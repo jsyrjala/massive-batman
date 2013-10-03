@@ -1,6 +1,8 @@
 (ns liber.core
   (:use [compojure.core :only [defroutes ANY GET]]
-        [compojure.handler :only [api]])
+        [compojure.handler :only [api]]
+        [clojure.tools.logging :only (trace debug info warn error)]
+        )
   (:require [liber.resource :as resource]
             [liber.websocket :as websocket]
             [org.httpkit.server :as httpkit]
@@ -11,7 +13,7 @@
 
 (defroutes app
   (ANY ["/ping"] [] resource/ping)
-  
+
   ;; all trackers (visible for current user)
   (ANY ["/trackers"] [] resource/trackers)
   ;; tracker
@@ -38,7 +40,7 @@
   (ANY ["/auth-tokens"] [] resource/auth-tokens )
   ;; delete token (logout)
   (ANY ["/auth-tokens/:token"] [token] (resource/auth-token token))
-  
+
   (ANY ["/groups"] [] resource/groups)
   (ANY ["/groups/:group-id"] [group-id] (resource/group group-id))
   (ANY ["/groups/:group-id/users"] [group-id] (resource/group-users group-id))
@@ -53,6 +55,8 @@
   )
 
 (defn -main [& args]
-  (println "start")
-  (httpkit/run-server (-> #'app reload/wrap-reload) {:port 9090})
+  (let [port 9090]
+    (info "Server starting at " port)
+    (httpkit/run-server (-> #'app reload/wrap-reload) {:port port}))
 )
+;; (-main)
