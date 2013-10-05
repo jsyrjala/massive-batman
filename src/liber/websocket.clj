@@ -33,6 +33,7 @@
     (send! ch (encode-json {:pong value} ))))
 
 (defn- subscribe! [ch pubsub tracker-id]
+  (info "subscribe" tracker-id)
   (swap! channel-hub (fn [channels]
                          (update-in channels
                                     [ch :trackers]
@@ -42,6 +43,7 @@
                                       )))))
 
 (defn- unsubscribe! [ch pubsub tracker-id]
+  (info "unsubscribe" tracker-id)
   (swap! channel-hub (fn [channels]
                        (update-in channels [ch :trackers]
                                   (fn [tracker-ids]
@@ -50,6 +52,7 @@
                                     )))))
 
 (defn- unsubscribe-all! [ch pubsub]
+  (info "unsubscribe all")
   (swap! channel-hub (fn [channels]
                        (doseq [tracker-id (get-in channels [ch :trackers])]
                          ;; TODO remove listeners

@@ -1,19 +1,27 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-    <script src="ws.js"></script>
-  </head>
-  <body>
-    <h2>sivu</h2>
+    <head>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        <script src="ws.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    </head>
+    <body>
+        <h2>sivu</h2>
+
+        <button id="ping">Ping</button>
+        <br />
+        <input id="ids" placeholder="id to subscribe" type="text" />
+        <button id="subscribe">Subscribe</button>
+        <button id="unsubscribe">Unsubscribe</button>
+        <br />
+        <input id="data" autofocus type="text" placeholder="Send stuff" value='' />
+
+        <button id="send">Send</button>
 
 
-      <input id="data" autofocus type="text" placeholder="Send stuff" value='{"ping": "123"}' />
-      <button id="send">Send</button>
-
-
-      <ul id="content">
-          <li>content goes here</li>
-      </ul>
-  </body>
+        <ul id="content">
+            <li>content goes here</li>
+        </ul>
+    </body>
 </html>
