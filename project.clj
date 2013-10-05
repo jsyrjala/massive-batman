@@ -33,6 +33,10 @@
                  [compojure "1.1.5"]
                  [liberator "0.9.0"]
                  [http-kit "2.1.10"]
+                 [cheshire "5.2.0"]
+
+                 ;; pubsub, cache
+                 [com.taoensso/carmine "2.2.3"]
 
                  ;; util
                  [clj-time "0.5.1"]

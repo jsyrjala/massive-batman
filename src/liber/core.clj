@@ -14,6 +14,5 @@
   (let [port 9090]
     (reset! system (system/create-system port))
     (swap! system start)
-    (prn @system)
-    (swap! system stop)
+    ;;(swap! system stop)
     ))
