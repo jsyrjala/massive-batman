@@ -1,5 +1,6 @@
 (ns liber.websocket
-  (:require [cheshire.core :as cheshire])
+  (:require [cheshire.core :as cheshire]
+            [liber.pubsub :as pubsub])
   (:use org.httpkit.server
         liber.lifecycle
         [clojure.tools.logging :only (trace debug info warn error)])
@@ -13,80 +14,60 @@
 (defn- decode-json [msg] (cheshire/parse-string msg true))
 (defn- encode-json [msg] (cheshire/generate-string msg))
 
-(def channel-hub (atom {}))
+(defn- send-json! [ch msg]
+  (send! ch (encode-json msg)))
 
 (defn- send-tracker! [ch tracker]
   (debug "Send tracker data to websocket")
-  (send! ch tracker)
-  )
-
-(defn- send-json! [ch msg]
-  (send! ch (encode-json msg)))
+  (send-json! ch tracker))
 
 (defn- unsupported-message [ch data]
   (warn "unsupported message" data)
   (send-json! ch {:error "Unsupported message" :message data}))
 
-(defn- ping [ch msg]
+(defn- send-tracker-update [channel message]
+  (info "got tracker update" message)
+  (send-json! channel message))
+
+(defn- ping [ch pubsub-service msg]
   (let [value (:ping msg)]
     (info "got ping" msg)
-    (send! ch (encode-json {:pong value} ))))
+    (pubsub/broadcast! pubsub-service :tracker "2" msg)
+    (send-json! ch {:pong value} )))
 
-(defn- subscribe! [ch pubsub tracker-id]
-  (info "subscribe" tracker-id)
-  (swap! channel-hub (fn [channels]
-                         (update-in channels
-                                    [ch :trackers]
-                                    (fn [tracker-ids]
-                                      ;; TODO add listener
-                                      (assoc tracker-ids tracker-id nil)
-                                      )))))
+(defn- subscribe! [ch pubsub-service tracker-id]
+  (info "subscribe tracker" tracker-id)
+  (pubsub/subscribe! pubsub-service ch :tracker tracker-id send-tracker-update))
 
-(defn- unsubscribe! [ch pubsub tracker-id]
-  (info "unsubscribe" tracker-id)
-  (swap! channel-hub (fn [channels]
-                       (update-in channels [ch :trackers]
-                                  (fn [tracker-ids]
-                                    ;; TODO remove listener
-                                    (dissoc tracker-ids tracker-id)
-                                    )))))
+(defn- unsubscribe! [ch pubsub-service tracker-id]
+  (info "unsubscribe tracker" tracker-id)
+  (pubsub/unsubscribe! pubsub-service ch :tracker tracker-id))
 
-(defn- unsubscribe-all! [ch pubsub]
+(defn- unsubscribe-all! [ch pubsub-service]
   (info "unsubscribe all")
-  (swap! channel-hub (fn [channels]
-                       (doseq [tracker-id (get-in channels [ch :trackers])]
-                         ;; TODO remove listeners
-                         )
-                       (dissoc channels ch)
-                       )))
+  (pubsub/unsubscribe-all! pubsub-service ch))
 
-(defn- open-channel [ch pubsub request]
+(defn- open-channel [ch pubsub-service request]
   (info "Connection started")
-  (swap! channel-hub assoc ch {:request request})
-  (send-json! ch {:hello "Server V1"})
-  )
+  (send-json! ch {:hello "Server V1"}))
 
-
-(defn- new-event [ch pubsub data]
+(defn- new-event [ch pubsub-service data]
   (unsupported-message ch data))
 
-(defn- parse-message [ch pubsub msg]
+(defn- parse-message [ch pubsub-service msg]
   (let [data (decode-json msg)]
-    (cond (:ping data) (ping ch data)
-          (:subscribe data) (subscribe! ch pubsub (:ids data))
-          (:unsubscribe data) (unsubscribe! ch pubsub (:ids data))
-          (:event data) (new-event ch pubsub data)
+    (cond (:ping data) (ping ch pubsub-service data)
+          (:subscribe data) (subscribe! ch pubsub-service (:ids data))
+          (:unsubscribe data) (unsubscribe! ch pubsub-service (:ids data))
+          (:event data) (new-event ch pubsub-service data)
           :else (unsupported-message ch data)
-          )
-    )
-  )
+          )))
 
-(defn- close-channel [ch pubsub status]
-  (trace "websocket connection closed" status)
-  (swap! channel-hub dissoc ch)
-  )
+(defn- close-channel [ch pubsub-service status]
+  (info "websocket connection closed" status)
+  (unsubscribe-all! ch))
 
-(defrecord WebSocket [pubsub]
+(defrecord WebSocket [pubsub-service]
   Lifecycle
   AsyncRingHandler
   (start [this] this)
@@ -94,10 +75,10 @@
   (ring-handler [this]
                 (fn [request]
                   (with-channel request channel
-                    (open-channel channel pubsub request)
-                    (on-receive channel #(parse-message channel pubsub %))
-                    (on-close channel #(close-channel channel pubsub %))
+                    (open-channel channel pubsub-service request)
+                    (on-receive channel #(parse-message channel pubsub-service %))
+                    (on-close channel #(close-channel channel pubsub-service %))
                     ))))
 
-(defn new-websocket [pubsub]
-  (->WebSocket pubsub))
+(defn new-websocket [pubsub-service]
+  (->WebSocket pubsub-service))

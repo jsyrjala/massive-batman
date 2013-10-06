@@ -45,7 +45,7 @@
                                    :password ""
                                    :max-connections-per-partition 20
                                    :partition-count 4})
-        pubsub (pubsub/new-redis-server {})
+        pubsub (pubsub/new-pubsub-server)
         websocket (websocket/new-websocket pubsub)
         routes (route/new-rest-routes websocket)
         server (->Server port routes)
