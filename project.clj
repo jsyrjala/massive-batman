@@ -34,6 +34,7 @@
                  [liberator "0.9.0"]
                  [http-kit "2.1.10"]
                  [cheshire "5.2.0"]
+                 [ring-cors "0.1.0"]
 
                  ;; util
                  [clj-time "0.5.1"]

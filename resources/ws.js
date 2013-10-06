@@ -14,16 +14,20 @@ $(function() {
     return zeroPad(hour,2)+":"+zeroPad(min,2)+":"+zeroPad(sec,2);
   }
 
+  function display(msg, css_class) {
+      $("#content").prepend("<li class='" + css_class +"'>" + timestamp() + " " + msg +"</li>");
+  }
+
   function send(msg) {
     console.info("Client: ", msg);
     try {
-      $("#content").prepend("<li class='client'>" + timestamp() + " Client: <code>" + msg + "</code></li>");
+      display("Client: <code>" + msg + "</code>", 'client');
       ws.send(msg);
     } catch(err) {
       console.error("Sending failed, reconnecting", err);
       setTimeout(function() {
         connect(msg);
-      }, 100);
+      }, 500);
 
     }
   };
@@ -81,11 +85,36 @@ $(function() {
     return false;
   });
 
-  $('#send_event').click(function(e) {
+  function new_event_data() {
     var tracker_id = $('#tracker_id').val();
     var data = $('#event_data').val();
-    var event_data = {event: true, tracker_id: tracker_id, data: data};
-    sendJson(event_data);
+    return {event: true, tracker_id: tracker_id, data: data};
+  }
+
+  $('#send_event').click(function(e) {
+    sendJson(new_event_data());
+    return false;
+  });
+
+
+  function sendRestPost(url, data)  {
+    display("Client: " + url + " <code>" + JSON.stringify(data) + "</code>", 'client');
+
+    $.ajax({url: 'http://localhost:9090' + url,
+            type: 'POST',
+            data: JSON.stringify(data),
+            dataType: "json",
+            contentType: "application/json",
+            success: function(e) {
+              console.log("REST success", e);
+            }}).fail(function(e) {
+      console.log("REST fail", e);
+    });
+  };
+
+  $('#send_event_rest').click(function(e) {
+    var data = new_event_data();
+    sendRestPost('/events', data);
     return false;
   });
 

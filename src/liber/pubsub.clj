@@ -38,7 +38,6 @@
   (broadcast! [this sub-type sub-id message]
               (info "broadcast!" sub-type sub-id message)
               (when-let [item (get-in @channels [sub-type sub-id])]
-                (info "signal")
                 (reset! item message)) )
   )
 

@@ -45,9 +45,9 @@
                                    :password ""
                                    :max-connections-per-partition 20
                                    :partition-count 4})
-        pubsub (pubsub/new-pubsub-server)
-        websocket (websocket/new-websocket pubsub)
-        routes (route/new-rest-routes websocket)
+        pubsub-service (pubsub/new-pubsub-server)
+        websocket (websocket/new-websocket pubsub-service)
+        routes (route/new-rest-routes websocket pubsub-service)
         server (->Server port routes)
-        system (->LSystem database pubsub websocket routes server)]
+        system (->LSystem database pubsub-service websocket routes server)]
     system))

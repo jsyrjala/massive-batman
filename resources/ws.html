@@ -20,8 +20,10 @@
             <input id="tracker_id" type="number" size="5" placeholder="tracker_id"/><br />
             <label for="event_data">data</label><input id="event_data" type="input" placeholder="event data" />
             <div>
-                <button id="send_event">Send event</button>
+                <button id="send_event">Send event via WebSocket</button>
+                <button id="send_event_rest">Send event via REST</button>
             </div>
+
         </fieldset>
         <br />
         <input id="data" autofocus type="text" placeholder="Free form JSON to send" value='' />

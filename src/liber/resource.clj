@@ -1,6 +1,9 @@
 (ns liber.resource
   (:use [liberator.core :only [request-method-in handle-unauthorized]]
-        [liberator.representation :only [ring-response]])
+        [liberator.representation :only [ring-response]]
+        [clojure.tools.logging :only (trace debug info warn error)]
+        [liber.pubsub :as pubsub]
+        )
   (:require [liberator.core :as liberator])
 )
 
@@ -21,7 +24,7 @@
       `(defn ~name [~@args]
          (fn [request#]
            (liberator/run-resource request# ~(add-defaults kvs)))))
-    `(defn ~name [request#] 
+    `(defn ~name [request#]
        (liberator/run-resource request# ~(add-defaults kvs)))))
 ;;+++++++++++
 
@@ -34,7 +37,7 @@
                 (println "jee")
                 {:b "jee"}
                 )))
-  
+
 
 (defresource tracker [tracker-id]
   :handle-ok (fn [ctx]
@@ -48,7 +51,15 @@
 (defresource tracker-group [tracker-id group-id] )
 
 ;; events
-(defresource events )
+(defresource events [pubsub-service]
+  :allowed-methods [:post]
+  :post! (fn [req]
+           (let [data (-> req :request :body)]
+             (info "new-event" data)
+             (let [{:keys [tracker_id]} data]
+               (pubsub/broadcast! pubsub-service :tracker tracker_id data)
+               )))
+  )
 (defresource event [event-id] )
 
 ;; users
