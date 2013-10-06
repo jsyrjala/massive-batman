@@ -34,6 +34,8 @@ $(function() {
 
   function connect(msg) {
     ws = new WebSocket('ws://localhost:9090/websocket')
+    $("#content").prepend("<li class='client'>" + timestamp() + " Client connecting...</li>");
+
     ws.onopen = function() {
       console.debug("Connection opened");
       if(msg) {
@@ -80,6 +82,13 @@ $(function() {
     return false;
   });
 
+  $('#send_event').click(function(e) {
+    var tracker_id = $('#tracker_id').val();
+    var data = $('#event_data').val();
+    var event_data = {event: true, tracker_id: tracker_id, data: data};
+    sendJson(event_data);
+    return false;
+  });
   connect();
 
 

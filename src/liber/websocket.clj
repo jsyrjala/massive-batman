@@ -32,7 +32,6 @@
 (defn- ping [ch pubsub-service msg]
   (let [value (:ping msg)]
     (info "got ping" msg)
-    (pubsub/broadcast! pubsub-service :tracker "2" msg)
     (send-json! ch {:pong value} )))
 
 (defn- subscribe! [ch pubsub-service tracker-id]
@@ -49,10 +48,18 @@
 
 (defn- open-channel [ch pubsub-service request]
   (info "Connection started")
+  ;; authenticate or close
   (send-json! ch {:hello "Server V1"}))
 
-(defn- new-event [ch pubsub-service data]
-  (unsupported-message ch data))
+(defn- new-event [ch pubsub-service message]
+  ;; TODO validate format
+  ;; validate existance of tracker
+  ;; validate autorization to tracker
+  (info "new-event" message)
+  (let [{:keys [event tracker_id data]} message]
+    (pubsub/broadcast! pubsub-service :tracker (str tracker_id) message)
+    )
+  )
 
 (defn- parse-message [ch pubsub-service msg]
   (let [data (decode-json msg)]
@@ -65,7 +72,7 @@
 
 (defn- close-channel [ch pubsub-service status]
   (info "websocket connection closed" status)
-  (unsubscribe-all! ch))
+  (unsubscribe-all! ch pubsub-service))
 
 (defrecord WebSocket [pubsub-service]
   Lifecycle
