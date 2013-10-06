@@ -1,19 +1,34 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-    <script src="ws.js"></script>
-  </head>
-  <body>
-    <h2>sivu</h2>
+    <head>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        <script src="ws.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
 
+    </head>
+    <body>
+        <h2>WebSocket test page</h2>
 
-      <input id="data" autofocus type="text" placeholder="Send stuff" value='{"ping": "123"}' />
-      <button id="send">Send</button>
+        <button id="ping">Ping</button>
+        <br />
+        <input id="ids" placeholder="tracker_id to subscribe" type="number" />
+        <button id="subscribe">Subscribe</button>
+        <button id="unsubscribe">Unsubscribe</button>
+        <fieldset>
+            <legend>event</legend>
+            <label for="tracker_id">tracker_id</label>
+            <input id="tracker_id" type="number" size="5" placeholder="tracker_id"/><br />
+            <label for="event_data">data</label><input id="event_data" type="input" placeholder="event data" />
+            <div>
+                <button id="send_event">Send event</button>
+            </div>
+        </fieldset>
+        <br />
+        <input id="data" autofocus type="text" placeholder="Free form JSON to send" value='' />
 
+        <button id="send">Send</button>
 
-      <ul id="content">
-          <li>content goes here</li>
-      </ul>
-  </body>
+        <ul id="content">
+        </ul>
+    </body>
 </html>
