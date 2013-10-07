@@ -8,6 +8,7 @@
             [liber.route :as route]
             [liber.pubsub :as pubsub]
             [liber.websocket :as websocket]
+            [liber.database.migration :as migration]
             )
   )
 
@@ -23,7 +24,7 @@
         ((:httpkit this))
         (dissoc this :httpkit)))
 
-(defrecord LSystem [database pubsub websocket routes server]
+(defrecord LSystem [migrator database pubsub websocket routes server]
   Lifecycle
   (start [this]
          (info "Start system")
@@ -37,17 +38,29 @@
                 this (reverse (keys this)))))
 
 (defn create-system [port]
-  (info "creating a new system")
-  (let [;;routes (-> #'liber.route/app reload/wrap-reload)
-        database (db/new-database {:connection-uri "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1."
-                                   :classname "org.h2.Driver"
-                                   :username ""
-                                   :password ""
-                                   :max-connections-per-partition 20
-                                   :partition-count 4})
+  (info "Creating a new system")
+  (let [db-spec {:connection-uri "jdbc:h2:mem:test;DATABASE_TO_UPPER=FALSE;DB_CLOSE_DELAY=-1"
+                 :classname "org.h2.Driver"
+                 :username ""
+                 :password ""
+                 :max-connections-per-partition 20
+                 :partition-count 4}
+        db-spec-file {:connection-uri "jdbc:h2:file;DATABASE_TO_UPPER=TRUE"
+                      :classname "org.h2.Driver"
+                      :username ""
+                      :password ""
+                      :max-connections-per-partition 20
+                      :partition-count 4}
+        database (db/new-database db-spec)
+        migrator (migration/create-migrator db-spec)
         pubsub-service (pubsub/new-pubsub-server)
         websocket (websocket/new-websocket pubsub-service)
         routes (route/new-rest-routes websocket pubsub-service)
         server (->Server port routes)
-        system (->LSystem database pubsub-service websocket routes server)]
+        system (->LSystem migrator database pubsub-service websocket routes server)]
+    ;; TODO tmp
+    (migration/migrate-forward migrator)
+    (migration/migrate-backward migrator)
+
     system))
+

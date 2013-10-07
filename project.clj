@@ -21,6 +21,8 @@
                  [honeysql "0.4.2"]
                  [postgresql/postgresql "9.1-901.jdbc4"]
                  [com.jolbox/bonecp "0.7.1.RELEASE"]
+                 [ragtime/ragtime.core "0.3.4"]
+                 [ragtime/ragtime.sql "0.3.4"]
                  ;; database test
                  [com.h2database/h2 "1.3.172"]
 
