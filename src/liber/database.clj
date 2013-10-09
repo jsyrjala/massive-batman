@@ -25,19 +25,22 @@
       (.setPartitionCount pool partition-count))
     pool))
 
-(defrecord Database [db-spec]
+(defrecord Database [db-spec data]
   Lifecycle
   (start [this]
          (info "Start database connection")
          (let [pool (make-pool db-spec)]
-           (.close (.getConnection pool))
+           (swap! data assoc :datasource pool)
            (assoc this :datasource pool)))
   (stop [this]
         (info "Stop database connection")
-        (.close (:datasource this))
+        (try
+          (.close (:datasource1 @data))
+          (catch Exception e (error "failed to close" e)))
+        (info "connection closed")
         (dissoc this :datasource))
   )
 
 
 (defn new-database [db-spec]
-  (Database. db-spec))
+  (Database. db-spec (atom {})))
