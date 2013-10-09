@@ -27,6 +27,7 @@
                            (callback subscriber new-state)))
               )
   (unsubscribe! [this subscriber sub-type sub-id]
+                (info "unsubscribe" sub-type sub-id)
                 (remove-watch (get-in @channels [sub-type sub-id]) subscriber))
   (unsubscribe-all! [this subscriber]
                     ;; FIXME dumb implementation, loops over everything

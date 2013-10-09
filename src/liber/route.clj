@@ -75,16 +75,17 @@
   (start [this] this)
   (stop [this] this)
   (ring-handler [this]
-                (-> (create-routes websocket pubsub-service)
-                    (cors/wrap-cors :access-control-allow-origin #".*"
-                                    :access-control-allow-headers "X-Requested-With, Content-Type, Origin, Referer, User-Agent, Accept"
-                                    :access-control-allow-methods "OPTIONS, GET, POST, PUT, DELETE")
-                    (ring-json/wrap-json-body {:keywords? true})
-                    (ring-json/wrap-json-response {:pretty true})
-                    (middleware/wrap-x-forwarded-for)
-                    (middleware/wrap-exception-logging)
-                    (middleware/wrap-request-logger request-counter)
-                    )
+                (let [handler (create-routes websocket pubsub-service)]
+                  (-> handler
+                      (cors/wrap-cors :access-control-allow-origin #".*"
+                                      :access-control-allow-headers "X-Requested-With, Content-Type, Origin, Referer, User-Agent, Accept"
+                                      :access-control-allow-methods "OPTIONS, GET, POST, PUT, DELETE")
+                      (ring-json/wrap-json-body {:keywords? true})
+                      (ring-json/wrap-json-response {:pretty true})
+                      (middleware/wrap-x-forwarded-for)
+                      (middleware/wrap-exception-logging)
+                      (middleware/wrap-request-logger request-counter)
+                      ))
                 ))
 
 (defn new-rest-routes [websocket pubsub-service]

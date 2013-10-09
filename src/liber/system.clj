@@ -60,7 +60,7 @@
         system (->LSystem migrator database pubsub-service websocket routes server)]
     ;; TODO tmp
     (migration/migrate-forward migrator)
-    (migration/migrate-backward migrator)
+    ;; (migration/migrate-backward migrator)
 
     system))
 
