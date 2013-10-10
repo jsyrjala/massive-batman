@@ -28,14 +28,14 @@
 (defrecord Database [db-spec data]
   Lifecycle
   (start [this]
-         (info "Start database connection")
+         (debug "Start database connection")
          (let [pool (make-pool db-spec)]
            (swap! data assoc :datasource pool)
            (assoc this :datasource pool)))
   (stop [this]
-        (info "Stop database connection")
+        (debug "Stop database connection")
         (try
-          (.close (:datasource1 @data))
+          (.close (:datasource @data))
           (catch Exception e (error "failed to close" e)))
         (info "connection closed")
         (dissoc this :datasource))

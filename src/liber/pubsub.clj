@@ -15,10 +15,15 @@
   [channels]
   Lifecycle
   PubSub
-  (start [this] (assoc this :channels (atom {})))
-  (stop [this] (dissoc this :channels))
+  (start [this]
+         (debug "ClojurePubSub starting")
+         this)
+  (stop [this]
+        (debug "ClojurePubSub stopping")
+        (reset! channels {})
+        this)
   (subscribe! [this subscriber sub-type sub-id callback]
-              (info "subscribe!" sub-type sub-id)
+              (debug "subscribe!" sub-type sub-id)
               (swap! channels (fn [old]
                                 (update-in old [sub-type sub-id]
                                            (fn [old-atom] (or old-atom (atom nil))))))
@@ -27,7 +32,7 @@
                            (callback subscriber new-state)))
               )
   (unsubscribe! [this subscriber sub-type sub-id]
-                (info "unsubscribe" sub-type sub-id)
+                (debug "unsubscribe" sub-type sub-id)
                 (remove-watch (get-in @channels [sub-type sub-id]) subscriber))
   (unsubscribe-all! [this subscriber]
                     ;; FIXME dumb implementation, loops over everything
@@ -37,7 +42,7 @@
                           (remove-watch (last sub-id) subscriber)
                           ))))
   (broadcast! [this sub-type sub-id message]
-              (info "broadcast!" sub-type sub-id message)
+              (debug "broadcast!")
               (when-let [item (get-in @channels [sub-type sub-id])]
                 (reset! item message)) )
   )

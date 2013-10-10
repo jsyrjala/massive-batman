@@ -15,24 +15,24 @@
 (defrecord Server [port routes]
   Lifecycle
   (start [this]
-         (info "Start http kit, port:" port)
+         (debug "Start http kit, port:" port)
          (assoc this
            :httpkit (httpkit/run-server (route/ring-handler routes)
                                         {:port port})))
   (stop [this]
-        (info "Stop http kit, port:" port)
+        (debug "Stop http kit, port:" port)
         ((:httpkit this))
         (dissoc this :httpkit)))
 
 (defrecord LSystem [migrator database pubsub websocket routes server]
   Lifecycle
   (start [this]
-         (info "Start system")
+         (debug "Start system")
          (reduce (fn [system key]
                    (update-in system [key] start))
                  this (keys this)))
   (stop [this]
-        (info "Stop system")
+        (debug "Stop system")
         (reduce (fn [system key]
                   (update-in system [key] stop))
                 this (reverse (keys this)))))

@@ -26,28 +26,28 @@
   (send-json! ch {:error "Unsupported message" :message data}))
 
 (defn- send-tracker-update [channel message]
-  (info "got tracker update" message)
+  (debug "got tracker update" message)
   (send-json! channel message))
 
 (defn- ping [ch pubsub-service msg]
   (let [value (:ping msg)]
-    (info "got ping" msg)
+    (debug "got ping" msg)
     (send-json! ch {:pong value} )))
 
 (defn- subscribe! [ch pubsub-service tracker-id]
-  (info "subscribe tracker" tracker-id)
+  (debug "subscribe tracker" tracker-id)
   (pubsub/subscribe! pubsub-service ch :tracker tracker-id send-tracker-update))
 
 (defn- unsubscribe! [ch pubsub-service tracker-id]
-  (info "unsubscribe tracker" tracker-id)
+  (debug "unsubscribe tracker" tracker-id)
   (pubsub/unsubscribe! pubsub-service ch :tracker tracker-id))
 
 (defn- unsubscribe-all! [ch pubsub-service]
-  (info "unsubscribe all")
+  (debug "unsubscribe all")
   (pubsub/unsubscribe-all! pubsub-service ch))
 
 (defn- open-channel [ch pubsub-service request]
-  (info "Connection started")
+  (debug "Connection started")
   ;; authenticate or close
   (send-json! ch {:hello "Server V1"}))
 
@@ -55,7 +55,7 @@
   ;; TODO validate format
   ;; validate existance of tracker
   ;; validate autorization to tracker
-  (info "new-event" message)
+  (debug "new-event" message)
   (let [{:keys [event tracker_id data]} message]
     (pubsub/broadcast! pubsub-service :tracker (str tracker_id) message)
     )
@@ -71,14 +71,18 @@
           )))
 
 (defn- close-channel [ch pubsub-service status]
-  (info "websocket connection closed" status)
+  (debug "websocket connection closed" status)
   (unsubscribe-all! ch pubsub-service))
 
 (defrecord WebSocket [pubsub-service]
   Lifecycle
   AsyncRingHandler
-  (start [this] this)
-  (stop [this] this)
+  (start [this]
+         (debug "WebSocket handler starting")
+         this)
+  (stop [this]
+        (debug "WebSocket handler stopping")
+        this)
   (ring-handler [this]
                 (fn [request]
                   (with-channel request channel
