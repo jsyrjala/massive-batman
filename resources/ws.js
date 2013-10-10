@@ -118,6 +118,9 @@ $(function() {
     return false;
   });
 
+  $('#clear_console').click(function(e){
+      $("#content").html("<li>cleared</li>");
+  });
   connect();
 
 });
