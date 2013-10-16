@@ -25,8 +25,12 @@
       (.setPartitionCount pool partition-count))
     pool))
 
+(defprotocol Datasource
+  (datasource [this]))
+
 (defrecord Database [db-spec data]
   Lifecycle
+  Datasource
   (start [this]
          (debug "Start database connection")
          (let [pool (make-pool db-spec)]
@@ -39,6 +43,7 @@
           (catch Exception e (error "failed to close" e)))
         (info "connection closed")
         (dissoc this :datasource))
+  (datasource [this] (:datasource @data))
   )
 
 

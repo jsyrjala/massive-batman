@@ -119,7 +119,7 @@ $(function() {
   });
 
   $('#clear_console').click(function(e){
-      $("#content").html("<li>cleared</li>");
+      $("#content").html("<li>cleared</li>")
   });
   connect();
 

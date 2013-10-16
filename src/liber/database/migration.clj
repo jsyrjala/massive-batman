@@ -9,7 +9,12 @@
             )
   )
 
+(defn- create-update-trigger [table]
+  (let [name (str "tr_" table)])
+  ;; TODO
+  (str "CREATE TRIGGER " name " on table " table " on update set updated_at = now()"
 
+  ))
 
 (defn- drop-table [db table]
   (jdbc/db-do-commands
@@ -119,9 +124,9 @@
                              [:updated_at "timestamp not null default now()"]
                              [:created_at "timestamp not null default now()"]
                              )
-           (ddl/create-index :ix_events_event_time :events [:event_time])
-           (ddl/create-index :ix_events_created_at :events [:created_at])
-           (ddl/create-index :ix_events_trackers_id :events [:tracker_id])
+           (ddl/create-index :ix_events_event_time :events [:tracker_id :event_time])
+           (ddl/create-index :ix_events_created_at :events [:tracker_id :created_at])
+           (ddl/create-index :ix_events_trackers_id :events [:tracker_id :event_session_id])
            ))
     :down (fn [db] (drop-table db :events))}
 

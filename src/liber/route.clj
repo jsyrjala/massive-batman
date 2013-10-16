@@ -11,6 +11,7 @@
             [ring.middleware.json :as ring-json]
             [cheshire.core :as json]
             [liber.middleware :as middleware]
+            [liberator.dev :as liber-dev]
             )
   )
 
@@ -80,6 +81,7 @@
                       (cors/wrap-cors :access-control-allow-origin #".*"
                                       :access-control-allow-headers "X-Requested-With, Content-Type, Origin, Referer, User-Agent, Accept"
                                       :access-control-allow-methods "OPTIONS, GET, POST, PUT, DELETE")
+                      (liber-dev/wrap-trace :header :ui)
                       (ring-json/wrap-json-body {:keywords? true})
                       (ring-json/wrap-json-response {:pretty true})
                       (middleware/wrap-x-forwarded-for)

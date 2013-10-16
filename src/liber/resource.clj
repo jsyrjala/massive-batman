@@ -53,14 +53,21 @@
 ;; events
 (defresource events [pubsub-service]
   :allowed-methods [:post]
-  :post! (fn [req]
-           (let [data (-> req :request :body)]
+  :post! (fn [ctx]
+           (let [data (-> ctx :request :body)]
              (info "new-event" data)
              (let [{:keys [tracker_id]} data]
                (pubsub/broadcast! pubsub-service :tracker tracker_id data)
                )))
   )
-(defresource event [event-id] )
+(defresource event [event-id]
+  :allowed-methods [:get]
+  :exists? (fn [ctx]
+             ;;(let [event (get-event event-id)]
+             ;;  {::event event}
+              ;; )
+             )
+  )
 
 ;; users
 (defresource users )
