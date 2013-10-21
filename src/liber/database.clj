@@ -43,7 +43,7 @@
           (catch Exception e (error "failed to close" e)))
         (info "connection closed")
         (dissoc this :datasource))
-  (datasource [this] (:datasource @data))
+  (datasource [this] @data)
   )
 
 

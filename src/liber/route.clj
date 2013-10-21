@@ -21,7 +21,7 @@
 (defn json-response [body & [status]]
   {:status (or status 404) :body body})
 
-(defn- create-routes [websocket pubsub-service]
+(defn- create-routes [websocket event-service]
   (routes
    ;; OPTIONS response is needed for CORS
    (OPTIONS ["*"] [] "OK")
@@ -43,7 +43,7 @@
    (ANY ["/trackers/:tracker-id/groups/:group-id"] [tracker-id group-id] (resource/tracker-group tracker-id group-id))
 
    ;; add new event
-   (ANY ["/events"] [] (resource/events pubsub-service))
+   (ANY ["/events"] [] (resource/events event-service))
    (ANY ["/events/:event-id"] [event-id] (resource/event event-id))
 
    (ANY ["/users"] [] resource/users)
@@ -70,13 +70,13 @@
 
 (def request-counter (atom 0))
 
-(defrecord RestRoutes [websocket pubsub-service]
+(defrecord RestRoutes [websocket event-service]
   Lifecycle
   Routes
   (start [this] this)
   (stop [this] this)
   (ring-handler [this]
-                (let [handler (create-routes websocket pubsub-service)]
+                (let [handler (create-routes websocket event-service)]
                   (-> handler
                       (cors/wrap-cors :access-control-allow-origin #".*"
                                       :access-control-allow-headers "X-Requested-With, Content-Type, Origin, Referer, User-Agent, Accept"
@@ -90,5 +90,5 @@
                       ))
                 ))
 
-(defn new-rest-routes [websocket pubsub-service]
-  (->RestRoutes websocket pubsub-service))
+(defn new-rest-routes [websocket event-service]
+  (->RestRoutes websocket event-service))

@@ -53,6 +53,8 @@
 ;; events
 (defresource events [pubsub-service]
   :allowed-methods [:post]
+  ;; check tracker exists
+  ;; check valid checksum
   :post! (fn [ctx]
            (let [data (-> ctx :request :body)]
              (info "new-event" data)
@@ -62,12 +64,13 @@
   )
 (defresource event [event-id]
   :allowed-methods [:get]
+  ;; check authorization
   :exists? (fn [ctx]
              ;;(let [event (get-event event-id)]
              ;;  {::event event}
               ;; )
              )
-  )
+  :handle-ok ::event)
 
 ;; users
 (defresource users )

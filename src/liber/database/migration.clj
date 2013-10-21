@@ -9,17 +9,11 @@
             )
   )
 
-(defn- create-update-trigger [table]
-  (let [name (str "tr_" table)])
-  ;; TODO
-  (str "CREATE TRIGGER " name " on table " table " on update set updated_at = now()"
-
-  ))
-
 (defn- drop-table [db table]
   (jdbc/db-do-commands
    db
    (ddl/drop-table table)))
+
 
 (def migration-list
   [
@@ -36,7 +30,7 @@
                              [:updated_at "timestamp not null default now()"]
                              [:created_at "timestamp not null default now()"]
                              )
-           (ddl/create-index :ix_users_username :users [:username])))
+           (ddl/create-index :uix_users_username :users [:username] :unique)))
     :down (fn [db] (drop-table db :users))}
 
    {:id "add-groups-table"
@@ -49,7 +43,9 @@
                              [:name "varchar(128) not null"]
                              [:updated_at "timestamp not null default now()"]
                              [:created_at "timestamp not null default now()"]
-                             )))
+                             )
+           (ddl/create-index :uix_groups_owner_id :groups [:owner_id :name] :unique)))
+
     :down (fn [db]
             (drop-table db :groups))}
 
@@ -75,7 +71,7 @@
            db
            (ddl/create-table :trackers
                              [:id "bigint auto_increment primary key"]
-                             [:tracker_code "varchar(256) not null unique"]
+                             [:tracker_code "varchar(256) not null"]
                              [:latest_activity "timestamp"]
                              [:owner_id "bigint not null references users on delete cascade"]
                              [:public "boolean not null default false"]
@@ -85,7 +81,8 @@
                              [:description "varchar(256)"]
                              [:updated_at "timestamp not null default now()"]
                              [:created_at "timestamp not null default now()"])
-           (ddl/create-index :ix_trackers_name :trackers [:name]) ))
+           (ddl/create-index :ix_trackers_name :trackers [:name])
+           (ddl/create-index :uix_tracker_code :trackers [:tracker_code] :unique)))
     :down (fn [db]
             (drop-table db :trackers))}
 
@@ -101,7 +98,7 @@
                              [:session_code "varchar(50) not null"]
                              [:updated_at "timestamp not null default now()"]
                              [:created_at "timestamp not null default now()"])
-           (ddl/create-index :ix_event_sessions_code :event_sessions [:session_code :tracker_id] :unique)
+           (ddl/create-index :uix_event_sessions_code :event_sessions [:session_code :tracker_id] :unique)
            (ddl/create-index :ix_event_sessions_latest :event_sessions [:latest_event_time])
            ))
     :down (fn [db] (drop-table db :event_sessions))}
@@ -119,6 +116,8 @@
                              [:longitude "decimal"]
                              [:horizontal_accuracy "decimal(10,2)"]
                              [:vertical_accuracy "decimal(10,2)"]
+                             [:speed "decimal(5,2)"]
+                             [:heading "decimal(5,2)"]
                              [:satellite_count "integer"]
                              [:altitude "decimal"]
                              [:updated_at "timestamp not null default now()"]

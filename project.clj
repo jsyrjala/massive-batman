@@ -44,7 +44,7 @@
                  [ring-cors "0.1.0"]
 
                  ;; util
-                 [clj-time "0.5.1"]
+                 [clj-time "0.6.0"]
 
                  ]
   :main liber.core

@@ -9,6 +9,7 @@
             [liber.pubsub :as pubsub]
             [liber.websocket :as websocket]
             [liber.database.migration :as migration]
+            [liber.database.events :as events]
             )
   )
 
@@ -24,7 +25,7 @@
         ((:httpkit this))
         (dissoc this :httpkit)))
 
-(defrecord LSystem [migrator database pubsub websocket routes server]
+(defrecord LSystem [migrator database pubsub websocket event-service routes server]
   Lifecycle
   (start [this]
          (debug "Start system")
@@ -55,12 +56,13 @@
         migrator (migration/create-migrator db-spec)
         pubsub-service (pubsub/new-pubsub-server)
         websocket (websocket/new-websocket pubsub-service)
-        routes (route/new-rest-routes websocket pubsub-service)
+        event-service (events/new-event-service database pubsub-service)
+        routes (route/new-rest-routes websocket event-service)
         server (->Server port routes)
-        system (->LSystem migrator database pubsub-service websocket routes server)]
+        system (->LSystem migrator database pubsub-service websocket event-service routes server)]
     ;; TODO tmp
     (migration/migrate-forward migrator)
     ;; (migration/migrate-backward migrator)
-
+    ;;(events/create-tracker! event-service {})
     system))
 
