@@ -1,9 +1,30 @@
 <configuration scan="true" scanPeriod="10 seconds">
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-      <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36}: %msg%n</pattern>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>WARN</level>
+      <onMatch>DENY</onMatch>
+      <onMismatch>NEUTRAL</onMismatch>
+    </filter>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>ERROR</level>
+      <onMatch>DENY</onMatch>
+      <onMismatch>NEUTRAL</onMismatch>
+    </filter>
+    <encoder>
+      <pattern>%d{HH:mm:ss,SSS} %-5p %c %msg%n</pattern>
     </encoder>
   </appender>
+
+  <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
+    </filter>
+    <encoder>
+      <pattern>%d{HH:mm:ss,SSS} %-5p %c %msg%n</pattern>
+    </encoder>
+    <target>System.err</target>
+  </appender>
+
 
   <logger name="ch.qos.logback" level="warn" />
   <logger name="org.mortbay.log" level="info" />
@@ -13,5 +34,6 @@
 
   <root level="trace">
     <appender-ref ref="STDOUT" />
+    <appender-ref ref="STDERR" />
   </root>
 </configuration>
