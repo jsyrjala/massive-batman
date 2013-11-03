@@ -6,6 +6,7 @@
             [ring.middleware.reload :as reload]
             [liber.database :as db]
             [liber.route :as route]
+            [liber.resource :as resource]
             [liber.pubsub :as pubsub]
             [liber.websocket :as websocket]
             [liber.database.migration :as migration]
@@ -57,7 +58,8 @@
         pubsub-service (pubsub/new-pubsub-server)
         websocket (websocket/new-websocket pubsub-service)
         event-service (events/new-event-service database pubsub-service)
-        routes (route/new-rest-routes websocket event-service)
+        resources (resource/new-event-resources event-service)
+        routes (route/new-rest-routes websocket resources)
         server (->Server port routes)
         system (->LSystem migrator database pubsub-service websocket event-service routes server)]
     ;; TODO tmp

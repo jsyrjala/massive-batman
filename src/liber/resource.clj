@@ -2,13 +2,15 @@
   (:use [liberator.core :only [request-method-in handle-unauthorized]]
         [liberator.representation :only [ring-response]]
         [clojure.tools.logging :only (trace debug info warn error)]
-        [liber.pubsub :as pubsub]
+        [liber.database.events :as events]
+        liber.lifecycle
         )
   (:require [liberator.core :as liberator])
 )
 
-(def resource-defaults {:available-media-types ["application/json"]
-                  })
+(def resource-defaults
+  {:available-media-types ["application/json"]
+   })
 
 (defn- add-defaults [kvs]
   (merge resource-defaults (apply hash-map kvs)))
@@ -26,68 +28,123 @@
            (liberator/run-resource request# ~(add-defaults kvs)))))
     `(defn ~name [request#]
        (liberator/run-resource request# ~(add-defaults kvs)))))
-;;+++++++++++
 
-(def ping (resource :handle-ok {:ping :ok}))
-
-;; trackers
-(def trackers
-  (resource
-   :handle-ok (fn [ctx]
-                (println "jee")
-                {:b "jee"}
-                )))
-
-
-(defresource tracker [tracker-id]
-  :handle-ok (fn [ctx]
-               (println tracker-id)
-               {:a tracker-id}))
-
-(defresource tracker-events [tracker-id] )
-(defresource tracker-sessions [tracker-id] )
-(defresource tracker-users [tracker-id] )
-(defresource tracker-groups [tracker-id] )
-(defresource tracker-group [tracker-id group-id] )
-
-;; events
-(defresource events [pubsub-service]
-  :allowed-methods [:post]
-  ;; check tracker exists
-  ;; check valid checksum
-  :post! (fn [ctx]
-           (let [data (-> ctx :request :body)]
-             (info "new-event" data)
-             (let [{:keys [tracker_id]} data]
-               (pubsub/broadcast! pubsub-service :tracker tracker_id data)
-               )))
+(defprotocol EventResources
+  (ping [this])
+  ;; trackers
+  (trackers [this])
+  (tracker [this tracker-id])
+  (tracker-events [this tracker-id])
+  (tracker-sessions [this tracker-id])
+  (tracker-users [this tracker-id])
+  (tracker-groups [this tracker-id])
+  (tracker-group [this tracker-id group-id])
+  ;; events
+  (events [this])
+  (event [this event-id])
+  ;; users
+  (users [this])
+  (user [this user-id])
+  ;; auth-tokens
+  (auth-tokens [this])
+  (auth-token [this token] )
+  ;; groups
+  (groups [this])
+  (group [this group-id] )
+  (group-users [this group-id] )
+  (group-trackers [this group-id] )
+  ;; sessions
+  (sessions [this])
+  (session [this session-id] )
+  (session-events [this session-id] )
   )
-(defresource event [event-id]
-  :allowed-methods [:get]
-  ;; check authorization
-  :exists? (fn [ctx]
-             ;;(let [event (get-event event-id)]
-             ;;  {::event event}
-              ;; )
-             )
-  :handle-ok ::event)
 
-;; users
-(defresource users )
-(defresource user [user-id] )
+(defrecord JsonEventResources [event-service]
+  Lifecycle
+  EventResources
+  (start [this] this)
+  (stop [this] this)
+  (ping [this] (resource :handle-ok {:ping :ok}))
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; trackers
+  (trackers [this]
+            (resource
+             :handle-ok (fn [ctx]
+                          (println "jee")
+                          {:b "jee"}
+                          )))
 
-;; auth
-(defresource auth-tokens )
-(defresource auth-token [token] )
+  (tracker [this tracker-id]
+           (resource
+            :handle-ok (fn [ctx]
+                         (println tracker-id)
+                         {:a tracker-id})))
 
-;; groups
-(defresource groups )
-(defresource group [group-id] )
-(defresource group-users [group-id] )
-(defresource group-trackers [group-id] )
+  (tracker-events [this tracker-id] (resource))
+  (tracker-sessions [this tracker-id] (resource))
+  (tracker-users [this tracker-id] (resource))
+  (tracker-groups [this tracker-id] (resource))
+  (tracker-group [this tracker-id group-id] (resource))
 
-;; sessions
-(defresource sessions )
-(defresource session [session-id] )
-(defresource session-events [session-id] )
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; events
+  (events [this]
+          (resource
+           :allowed-methods [:post]
+           ;; check tracker exists
+           ;; check valid checksum
+           :post! (fn [ctx]
+                    (let [data (-> ctx :request :body)]
+                      (info "new-event" data)
+                      (let [{:keys [tracker_id]} data]
+                        (events/create-event! event-service tracker_id data)
+                        )))))
+
+  (event [this event-id]
+         (resource
+          :allowed-methods [:get]
+          ;; check authorization
+          :exists? (fn [ctx]
+                     ;;(let [event (get-event event-id)]
+                     ;;  {::event event}
+                     ;; )
+                     )
+          :handle-ok ::event))
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; users
+  (users [this]
+         (resource))
+  (user [this user-id]
+        (resource))
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; auth-tokens
+  (auth-tokens [this]
+         (resource))
+  (auth-token [this user-id]
+              (resource))
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; groups
+  (groups [this]
+          (resource))
+  (group [this group-id]
+         (resource))
+  (group-users [this group-id]
+               (resource))
+  (group-trackers [this group-id]
+                  (resource))
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; sessions
+  (sessions [this]
+            (resource))
+  (session [this session-id]
+           (resource))
+  (session-events [this session-id]
+                  (resource))
+
+
+  )
+
+(defn new-event-resources [event-service]
+  (->JsonEventResources event-service)
+  )
 
