@@ -4,9 +4,14 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
+  :plugins [[lein-midje "3.1.1"]
+            ]
   :profiles {:dev {:source-paths ["dev"]
-                   :dependencies [[org.clojure/tools.namespace "0.2.4"]
-                                  [org.clojure/java.classpath "0.2.1"]]}
+                   :dependencies
+                   [[org.clojure/tools.namespace "0.2.4"]
+                    [org.clojure/java.classpath "0.2.1"]
+                    [midje "1.5.1" :exclusions [org.clojure/clojure]]
+                    ]}
              :provided {:dependencies [[javax.servlet/servlet-api "2.5"]]}}
 
   :dependencies [[org.clojure/clojure "1.5.1"]
@@ -30,10 +35,10 @@
                  [ragtime/ragtime.core "0.3.4"]
                  [ragtime/ragtime.sql "0.3.4"]
                  ;; database test
-                 [com.h2database/h2 "1.3.172"]
+                 [com.h2database/h2 "1.3.174"]
 
 
-                 ;; web, rest, api
+                 ;; web, rest
                  [org.clojure/data.json "0.2.3"]
                  [ring/ring-devel "1.2.1"]
                  [ring/ring-core "1.2.1"]
@@ -44,9 +49,14 @@
                  [cheshire "5.2.0"]
                  [ring-cors "0.1.0"]
 
+                 ;; api
+                 [org.clojars.runa/clj-schema "0.9.4"]
+
                  ;; util
                  [clj-time "0.6.0"]
+                 [org.clojure/tools.cli "0.2.4"]
 
                  ]
   :main liber.core
+  :jvm-opts ["-server" "-XX:+UseConcMarkSweepGC"]
 )
