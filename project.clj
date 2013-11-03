@@ -49,6 +49,9 @@
                  [cheshire "5.2.0"]
                  [ring-cors "0.1.0"]
 
+                 ;; security
+                 [commons-codec/commons-codec "1.7"]
+
                  ;; api
                  [org.clojars.runa/clj-schema "0.9.4"]
 
