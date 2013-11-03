@@ -6,10 +6,11 @@
 
   :profiles {:dev {:source-paths ["dev"]
                    :dependencies [[org.clojure/tools.namespace "0.2.4"]
-                                  [org.clojure/java.classpath "0.2.1"]]}}
+                                  [org.clojure/java.classpath "0.2.1"]]}
+             :provided {:dependencies [[javax.servlet/servlet-api "2.5"]]}}
 
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.clojure/tools.trace "0.7.3"]
+                 [org.clojure/tools.trace "0.7.6"]
 
                  ;; logging
                  [org.clojure/tools.logging "0.2.6"
@@ -34,12 +35,12 @@
 
                  ;; web, rest, api
                  [org.clojure/data.json "0.2.3"]
-                 [ring/ring-devel "1.2.0"]
-                 [ring/ring-core "1.2.0"]
+                 [ring/ring-devel "1.2.1"]
+                 [ring/ring-core "1.2.1"]
                  [ring/ring-json "0.2.0"]
-                 [compojure "1.1.5"]
+                 [compojure "1.1.6"]
                  [liberator "0.9.0"]
-                 [http-kit "2.1.10"]
+                 [http-kit "2.1.12"]
                  [cheshire "5.2.0"]
                  [ring-cors "0.1.0"]
 
