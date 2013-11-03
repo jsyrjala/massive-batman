@@ -4,7 +4,12 @@
             [clojure.tools.logging :refer [trace debug info warn error]]
             [liber.database.events :as events]
             [liberator.core :as liberator]
-            [liber.lifecycle :refer [Lifecycle]])
+            [liberator.representation :as liberator-rep]
+            [liber.lifecycle :refer [Lifecycle]]
+
+            [liber.api-schema :as schema]
+            [cheshire.core :as json]
+            [clj-schema.validation :refer [validation-errors]])
 )
 
 (def resource-defaults
@@ -27,6 +32,20 @@
            (liberator/run-resource request# ~(add-defaults kvs)))))
     `(defn ~name [request#]
        (liberator/run-resource request# ~(add-defaults kvs)))))
+
+(defn- json-response
+  "Formats data map as JSON"
+  [status data]
+  (liberator-rep/ring-response {:status status
+                                :body (json/generate-string data {:prettyPrint true})
+                                  :header {:content-type "application/json"}
+                              }))
+
+(defn- validation-errors? [data schema]
+  (info "do some validation" data)
+  (let [errors (validation-errors schema data)]
+      [(not (empty? errors)) {:validation-errors errors}]
+    ))
 
 (defprotocol EventResources
   (ping [this])
@@ -90,14 +109,31 @@
   (events [this]
           (resource
            :allowed-methods [:post]
+           :malformed? (fn [ctx]
+                        (let [data (-> ctx :request :body)
+                              result (validation-errors? data schema/new-single-event-schema)]
+                          result
+                          ;; TODO convert and put stuff to ctx
+                        ))
+           :handle-malformed (fn [ctx]
+                               (let [errors (ctx :validation-errors)
+                                     resp (json-response 400 {:error :malformed-data
+                                                              :validation-errors errors} )]
+                                 (debug "Malformed request" errors)
+                                 resp))
            ;; check tracker exists
            ;; check valid checksum
            :post! (fn [ctx]
                     (let [data (-> ctx :request :body)]
                       (info "new-event" data)
-                      (let [{:keys [tracker_id]} data]
-                        (events/create-event! event-service tracker_id data)
-                        )))))
+                      (let [{:keys [tracker_id]} data
+                            new-event (events/create-event! event-service tracker_id data)]
+                        {:created event}
+                        )))
+           :handle-created (fn [ctx]
+                             {:success "ok"
+                              :created-event (ctx :created)}
+           ))
 
   (event [this event-id]
          (resource
