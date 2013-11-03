@@ -37,7 +37,7 @@ $(function() {
   };
 
   function connect(msg) {
-    ws = new WebSocket('ws://localhost:9090/websocket')
+    ws = new WebSocket('ws://laatikko.net:9090/websocket')
     $("#content").prepend("<li class='client'>" + timestamp() + " Client connecting...</li>");
     ws.onopen = function() {
       console.debug("Connection opened");
@@ -52,7 +52,7 @@ $(function() {
 
     ws.onmessage = function(e) {
       console.info("Server: ", e.data);
-      $("#content").prepend("<li class='server'>" + timestamp() + " Server: <code>" + e.data + "</code></li>");
+      display("Server:  <code>" + e.data + "</code>", "server");
     }
 
     ws.onclose = function(e) {
@@ -100,7 +100,7 @@ $(function() {
   function sendRestPost(url, data)  {
     display("Client: " + url + " <code>" + JSON.stringify(data) + "</code>", 'client');
 
-    $.ajax({url: 'http://localhost:9090' + url,
+    $.ajax({url: 'http://laatikko.net:9090' + url,
             type: 'POST',
             data: JSON.stringify(data),
             dataType: "json",
@@ -108,6 +108,7 @@ $(function() {
             success: function(e) {
               console.log("REST success", e);
             }}).fail(function(e) {
+      display("Server: " + e.status + " "+ e.statusText + ": <code>" + e.responseText + "</code>", "server error")
       console.log("REST fail", e);
     });
   };
