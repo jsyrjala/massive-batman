@@ -53,7 +53,7 @@
           event-time (get event :event_time store-time)
           event (assoc event :event_time event-time)
           tracker-id (or (:id tracker tracker))
-          session-code (:session_code event)
+          session-code (:session_code event "default")
           session (dao/get-or-create-session! conn tracker-id session-code event-time)
           new-event (dao/create-event! conn tracker-id (:id session) event)
           ext-values (find-ext-values event)
