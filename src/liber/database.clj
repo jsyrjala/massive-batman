@@ -1,8 +1,7 @@
 (ns liber.database
-  (:use liber.lifecycle
-        [clojure.tools.logging :only (trace debug info warn error)]
-        )
-  (:require [clojure.java.jdbc :as jdbc]
+  (:require [liber.lifecycle :refer [Lifecycle]]
+            [clojure.tools.logging :refer [trace debug info warn error]]
+            [clojure.java.jdbc :as jdbc]
             [clojure.java.jdbc.sql :as sql])
   (:import [com.jolbox.bonecp BoneCPDataSource])
   )

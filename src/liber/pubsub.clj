@@ -1,8 +1,8 @@
 (ns liber.pubsub
   "Publish-subscribe API"
-  (:use liber.lifecycle
-        [clojure.tools.logging :only (trace debug info warn error)])
-)
+  (:require [liber.lifecycle :refer [Lifecycle]]
+            [clojure.tools.logging :refer [trace debug info warn error]])
+  )
 
 (defprotocol PubSub
   (subscribe! [this subscriber sub-type sub-id callback])

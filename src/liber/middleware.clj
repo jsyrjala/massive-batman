@@ -1,7 +1,7 @@
 (ns liber.middleware
   "Compojure middlewares"
-  (:require [clojure.string :as string])
-  (:use [clojure.tools.logging :only (debug info warn error)] )
+  (:require [clojure.string :as string]
+            [clojure.tools.logging :refer [debug info warn error]])
   (:import com.fasterxml.jackson.core.JsonParseException) )
 
 (defn wrap-exception [handler]

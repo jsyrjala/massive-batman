@@ -1,11 +1,10 @@
 (ns liber.parse
-  (:require [clojure.string :as string])
+  (:require [clojure.string :as string]
+            [clj-time.core :refer [now time-zone-for-id]]
+            [clj-time.coerce :refer [from-long]]
+            [clj-time.format :refer [formatter parse unparse]])
   (:import [java.lang IllegalArgumentException]
-           [java.math BigDecimal BigInteger RoundingMode]
-           )
-  (:use [clj-time.core :only (now time-zone-for-id ) ]
-        [clj-time.coerce :only (from-long) ]
-        [clj-time.format :only (formatter parse unparse) ])
+           [java.math BigDecimal BigInteger RoundingMode])
   )
 
 (defn- upper-matches-regex? [^String value regex]

@@ -6,9 +6,8 @@
             [liber.pubsub :as pubsub]
             [liber.database.dao :as dao]
             [clj-time.core :as clj-time]
-            )
-  (:use [clojure.tools.logging :only (debug info warn error)]
-        [liber.lifecycle]
+            [clojure.tools.logging :refer [debug info warn error]]
+            [liber.lifecycle :refer [Lifecycle]]
         )
   )
 

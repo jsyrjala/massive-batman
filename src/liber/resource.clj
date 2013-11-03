@@ -1,11 +1,10 @@
 (ns liber.resource
-  (:use [liberator.core :only [request-method-in handle-unauthorized]]
-        [liberator.representation :only [ring-response]]
-        [clojure.tools.logging :only (trace debug info warn error)]
-        [liber.database.events :as events]
-        liber.lifecycle
-        )
-  (:require [liberator.core :as liberator])
+  (:require [liberator.core :refer [request-method-in handle-unauthorized]]
+            [liberator.representation :refer [ring-response]]
+            [clojure.tools.logging :refer [trace debug info warn error]]
+            [liber.database.events :as events]
+            [liberator.core :as liberator]
+            [liber.lifecycle :refer [Lifecycle]])
 )
 
 (def resource-defaults

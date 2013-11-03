@@ -1,10 +1,9 @@
 (ns liber.route
-  (:use [compojure.core :only [defroutes routes ANY GET OPTIONS]]
-        [compojure.handler :only [api]]
-        [clojure.tools.logging :only (trace debug info warn error)]
-        liber.lifecycle
-        )
-  (:require [liber.resource :as resource]
+  (:require [compojure.core :refer [defroutes routes ANY GET OPTIONS]]
+            [compojure.handler :refer [api]]
+            [clojure.tools.logging :refer [trace debug info warn error]]
+            [liber.lifecycle :refer [Lifecycle]]
+            [liber.resource :as resource]
             [ring.middleware.reload :as reload]
             [liber.websocket :as ws]
             [ring.middleware.cors :as cors]

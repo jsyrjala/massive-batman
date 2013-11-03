@@ -1,6 +1,6 @@
 (ns liber.util
-  (:use [clojure.tools.logging :only (debug info warn error)]
-        )
+  (:require [clojure.tools.logging :refer [debug info warn error]]
+            )
   )
 
 (defn try-times*

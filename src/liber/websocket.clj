@@ -1,10 +1,10 @@
 (ns liber.websocket
   (:require [cheshire.core :as cheshire]
-            [liber.pubsub :as pubsub])
-  (:use org.httpkit.server
-        liber.lifecycle
-        [clojure.tools.logging :only (trace debug info warn error)])
-)
+            [liber.pubsub :as pubsub]
+            [org.httpkit.server :refer [send! with-channel on-receive on-close]]
+            [liber.lifecycle :refer [Lifecycle]]
+            [clojure.tools.logging :refer [trace debug info warn error]])
+  )
 
 (defprotocol AsyncRingHandler
   (ring-handler [this]))

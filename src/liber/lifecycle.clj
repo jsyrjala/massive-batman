@@ -1,5 +1,5 @@
 (ns liber.lifecycle
-  (:use [clojure.tools.logging :only (trace debug info warn error)])
+  (:require [clojure.tools.logging :refer [trace debug info warn error]])
   )
 
 (defprotocol Lifecycle

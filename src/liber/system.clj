@@ -1,8 +1,7 @@
 (ns liber.system
-  (:use [liber.lifecycle]
-        [clojure.tools.logging :only (trace debug info warn error)]
-        )
-  (:require [org.httpkit.server :as httpkit]
+  (:require [liber.lifecycle :refer [Lifecycle start stop]]
+            [clojure.tools.logging :refer [trace debug info warn error]]
+            [org.httpkit.server :as httpkit]
             [ring.middleware.reload :as reload]
             [liber.database :as db]
             [liber.route :as route]
