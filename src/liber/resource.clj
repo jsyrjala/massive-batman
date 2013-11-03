@@ -6,10 +6,10 @@
             [liberator.core :as liberator]
             [liberator.representation :as liberator-rep]
             [liber.lifecycle :refer [Lifecycle]]
-
             [liber.api-schema :as schema]
             [cheshire.core :as json]
-            [clj-schema.validation :refer [validation-errors]])
+            [clj-schema.validation :refer [validation-errors]]
+            [liber.util :as util])
 )
 
 (def resource-defaults
@@ -109,30 +109,32 @@
   (events [this]
           (resource
            :allowed-methods [:post]
+           ;; check tracker exists
+           ;; check valid checksum/password
+           :authorized?
+           :allowed? true
            :malformed? (fn [ctx]
                         (let [data (-> ctx :request :body)
-                              result (validation-errors? data schema/new-single-event-schema)]
-                          result
-                          ;; TODO convert and put stuff to ctx
-                        ))
+                              errors (validation-errors schema/new-single-event-schema data)
+                              converted-data (util/convert data schema/new-event-conversion)]
+                          (debug errors (not (empty? errors)))
+                          [(not (empty? errors)) {::validation-errors errors
+                                                  ::data converted-data}]))
            :handle-malformed (fn [ctx]
-                               (let [errors (ctx :validation-errors)
+                               (let [errors (ctx ::validation-errors)
                                      resp (json-response 400 {:error :malformed-data
                                                               :validation-errors errors} )]
                                  (debug "Malformed request" errors)
                                  resp))
-           ;; check tracker exists
-           ;; check valid checksum
            :post! (fn [ctx]
-                    (let [data (-> ctx :request :body)]
+                    (let [data (-> ctx ::data)]
                       (info "new-event" data)
                       (let [{:keys [tracker_id]} data
                             new-event (events/create-event! event-service tracker_id data)]
-                        {:created event}
-                        )))
+                        {::created event} )))
            :handle-created (fn [ctx]
-                             {:success "ok"
-                              :created-event (ctx :created)}
+                             {:success "OK"
+                              :created-event (ctx ::created)})
            ))
 
   (event [this event-id]
