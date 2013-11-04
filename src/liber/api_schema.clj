@@ -5,6 +5,7 @@
                                        constraints]]
             [clj-schema.validation :refer [validation-errors]]
             [liber.parse :refer [parse-decimal parse-coordinate parse-timestamp parse-integer parse-boolean]]
+            [liber.util :as util]
             ))
 
 (defn- max-length [len] (fn [str] (<= (count str) len)))
@@ -111,3 +112,10 @@
    [:altitude] parse-decimal
    [:temperature] parse-decimal
    })
+
+(defn validate-convert [data schema conversion]
+  (let [errors (validation-errors schema data)]
+    (if (empty? errors)
+      {:data (util/convert data conversion)}
+      {:errors errors}
+    )))

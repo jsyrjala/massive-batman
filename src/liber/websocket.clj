@@ -1,8 +1,10 @@
 (ns liber.websocket
   (:require [cheshire.core :as cheshire]
             [liber.pubsub :as pubsub]
+            [liber.database.events :as events]
             [org.httpkit.server :refer [send! with-channel on-receive on-close]]
             [liber.lifecycle :refer [Lifecycle]]
+            [liber.api-schema :as schema]
             [clojure.tools.logging :refer [trace debug info warn error]])
   )
 
@@ -51,22 +53,25 @@
   ;; authenticate or close
   (send-json! ch {:hello "Server V1"}))
 
-(defn- new-event [ch pubsub-service message]
-  ;; TODO validate format
+(defn- new-event [ch event-service message]
+  ;; TODO move validation to event-service?
   ;; validate existance of tracker
   ;; validate autorization to tracker
   (debug "new-event" message)
-  (let [{:keys [event tracker_id data]} message]
-    (pubsub/broadcast! pubsub-service :tracker (str tracker_id) message)
-    )
-  )
+  (let [{:keys [event tracker_id data]} message
+        result (schema/validate-convert message schema/new-single-event-schema schema/new-event-conversion)]
+    (cond (:errors result) (send-json! ch {:validation-errors (:errors result)})
+          :default (do
+                     (events/create-event! event-service tracker_id (:data result))
+                     (send-json! {:success "OK"})
+                     ))))
 
-(defn- parse-message [ch pubsub-service msg]
+(defn- parse-message [ch pubsub-service event-service msg]
   (let [data (decode-json msg)]
     (cond (:ping data) (ping ch pubsub-service data)
           (:subscribe data) (subscribe! ch pubsub-service (:ids data))
           (:unsubscribe data) (unsubscribe! ch pubsub-service (:ids data))
-          (:event data) (new-event ch pubsub-service data)
+          (:event data) (new-event ch event-service data)
           :else (unsupported-message ch data)
           )))
 
@@ -74,7 +79,7 @@
   (debug "websocket connection closed" status)
   (unsubscribe-all! ch pubsub-service))
 
-(defrecord WebSocket [pubsub-service]
+(defrecord WebSocket [pubsub-service event-service]
   Lifecycle
   AsyncRingHandler
   (start [this]
@@ -87,9 +92,9 @@
                 (fn [request]
                   (with-channel request channel
                     (open-channel channel pubsub-service request)
-                    (on-receive channel #(parse-message channel pubsub-service %))
+                    (on-receive channel #(parse-message channel pubsub-service event-service %))
                     (on-close channel #(close-channel channel pubsub-service %))
                     ))))
 
-(defn new-websocket [pubsub-service]
-  (->WebSocket pubsub-service))
+(defn new-websocket [pubsub-service event-service]
+  (->WebSocket pubsub-service event-service))

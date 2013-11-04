@@ -38,7 +38,7 @@
   [status data]
   (liberator-rep/ring-response {:status status
                                 :body (json/generate-string data {:prettyPrint true})
-                                  :header {:content-type "application/json"}
+                                :header {:content-type "application/json"}
                               }))
 
 (defn- validation-errors? [data schema]
@@ -109,10 +109,6 @@
   (events [this]
           (resource
            :allowed-methods [:post]
-           ;; check tracker exists
-           ;; check valid checksum/password
-           :authorized?
-           :allowed? true
            :malformed? (fn [ctx]
                         (let [data (-> ctx :request :body)
                               errors (validation-errors schema/new-single-event-schema data)
@@ -126,6 +122,10 @@
                                                               :validation-errors errors} )]
                                  (debug "Malformed request" errors)
                                  resp))
+           ;; check tracker exists
+           ;; check valid checksum/password
+           :authorized? true
+           :allowed? true
            :post! (fn [ctx]
                     (let [data (-> ctx ::data)]
                       (info "new-event" data)
