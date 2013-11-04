@@ -26,6 +26,7 @@
   (create-event! [this tracker event])
   (create-user! [this user])
   (create-tracker! [this owner tracker])
+  (get-tracker [this &{:keys [code id]}])
   (create-group! [this owner group]))
 
 (defrecord SqlEventService [database pubsub-service]
@@ -77,6 +78,14 @@
    (jdbc/db-transaction
     [conn (db/datasource database)]
     (dao/create-tracker! conn owner tracker)))
+
+  (get-tracker
+   [this &{:keys [code id]}]
+   (jdbc/db-transaction
+    [conn (db/datasource database)]
+    (cond id (dao/get-tracker conn id)
+          code (dao/get-tracker-by-code conn code))))
+
 
   (create-user!
    [this user]

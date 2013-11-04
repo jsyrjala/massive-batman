@@ -8,6 +8,9 @@
     </head>
     <body>
         <h2>WebSocket test page</h2>
+        <p>
+            <a href="http://localhost:9090/x-liberator/requests/">Liberator Trace</a>
+        </p>
 
         <button id="ping">Ping</button>
         <button id="clear_console">Clear console</button>
@@ -20,6 +23,8 @@
             <legend>event</legend>
             <label for="tracker_id">tracker_id</label>
             <input id="tracker_id" type="number" size="5" placeholder="tracker_id"/><br />
+            <label for="tracker_code">tracker_id</label>
+            <input id="tracker_code" type="text" placeholder="tracker_code" value="tracker1" /><br />
             <label for="event_data">data</label><input id="event_data" type="input" placeholder="event data" />
             <div>
                 <button id="send_event">Send event via WebSocket</button>

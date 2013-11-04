@@ -87,8 +87,14 @@ $(function() {
 
   function new_event_data() {
     var tracker_id = $('#tracker_id').val();
+    var tracker_code = $('#tracker_code').val();
+
     var data = $('#event_data').val();
-    return {event: true, tracker_id: tracker_id, data: data};
+    return {event: true,
+            version: 1,
+            tracker_id: tracker_id,
+            tracker_code: tracker_code,
+            data: data};
   }
 
   $('#send_event').click(function(e) {

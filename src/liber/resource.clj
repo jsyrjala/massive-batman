@@ -124,7 +124,17 @@
                                  resp))
            ;; check tracker exists
            ;; check valid checksum/password
-           :authorized? true
+           :authorized? (fn [ctx]
+                          (let [tracker-code (-> ctx ::data :tracker_code)
+                                tracker (events/get-tracker event-service :code tracker-code)]
+                            ;; TODO implement auth
+                            (if tracker
+                              {::tracker tracker}
+                              nil )))
+           :handle-unauthorized (fn [ctx]
+                                  (info "handle-unauthorized")
+                                  (json-response 401 {:error :not-authorized}))
+
            :allowed? true
            :post! (fn [ctx]
                     (let [data (-> ctx ::data)]

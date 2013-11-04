@@ -12,7 +12,7 @@
     (if-let [result (try
                       [(thunk)]
                       (catch Exception e
-                        (error e e)
+                        ;;(error "Failed" (.getMessage e))
                         (if (zero? n)
                           (throw e)
                           (Thread/sleep sleepMsec)

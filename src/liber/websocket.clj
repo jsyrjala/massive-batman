@@ -57,23 +57,27 @@
   ;; TODO move validation to event-service?
   ;; validate existance of tracker
   ;; validate autorization to tracker
-  (debug "new-event" message)
   (let [{:keys [event tracker_id data]} message
         result (schema/validate-convert message schema/new-single-event-schema schema/new-event-conversion)]
     (cond (:errors result) (send-json! ch {:validation-errors (:errors result)})
           :default (do
                      (events/create-event! event-service tracker_id (:data result))
-                     (send-json! {:success "OK"})
+                     (send-json! ch {:success "OK"})
                      ))))
 
 (defn- parse-message [ch pubsub-service event-service msg]
   (let [data (decode-json msg)]
-    (cond (:ping data) (ping ch pubsub-service data)
-          (:subscribe data) (subscribe! ch pubsub-service (:ids data))
-          (:unsubscribe data) (unsubscribe! ch pubsub-service (:ids data))
-          (:event data) (new-event ch event-service data)
-          :else (unsupported-message ch data)
-          )))
+    (try
+      (cond (:ping data) (ping ch pubsub-service data)
+            (:subscribe data) (subscribe! ch pubsub-service (:ids data))
+            (:unsubscribe data) (unsubscribe! ch pubsub-service (:ids data))
+            (:event data) (new-event ch event-service data)
+            :else (unsupported-message ch data)
+            )
+      (catch Exception e
+        (error e "Error while handling WebSocket message")
+        (send-json! ch {:error :internal-server-error}))
+      )))
 
 (defn- close-channel [ch pubsub-service status]
   (debug "websocket connection closed" status)

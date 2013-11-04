@@ -4,14 +4,6 @@
             [clojure.tools.logging :refer [debug info warn error]])
   (:import com.fasterxml.jackson.core.JsonParseException) )
 
-(defn wrap-exception [handler]
-  (fn [request]
-    (try (handler request)
-      (catch Exception e
-        (error e)
-        {:status 500
-         :body {:error "Internal error"}}))))
-
 (defn wrap-exception-logging
   "Logs uncaught exceptions"
   [handler]
@@ -20,8 +12,8 @@
       (handler req)
       (catch Exception e
         (error e "Handling request " (str req) " failed")
-        (throw e)))))
-
+        {:status 500
+         :body {:error "Internal error"}}))))
 
 (defn wrap-x-forwarded-for
   "Replace value of remote-addr -header with value of X-Forwarded-for -header if available."
