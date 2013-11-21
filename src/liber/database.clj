@@ -1,5 +1,5 @@
 (ns liber.database
-  (:require [liber.lifecycle :refer [Lifecycle]]
+  (:require [com.stuartsierra.component :refer [Lifecycle]]
             [clojure.tools.logging :refer [trace debug info warn error]]
             [clojure.java.jdbc :as jdbc]
             [clojure.java.jdbc.sql :as sql])

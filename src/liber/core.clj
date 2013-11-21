@@ -1,5 +1,5 @@
 (ns liber.core
-  (:require [liber.lifecycle :refer [start stop]]
+  (:require [com.stuartsierra.component :refer [start stop]]
             [clojure.tools.logging :refer [trace debug info warn error]]
             [liber.system :as system]
             [org.httpkit.server :as httpkit])

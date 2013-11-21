@@ -2,7 +2,7 @@
   (:require [compojure.core :refer [defroutes routes ANY GET OPTIONS]]
             [compojure.handler :refer [api]]
             [clojure.tools.logging :refer [trace debug info warn error]]
-            [liber.lifecycle :refer [Lifecycle]]
+            [com.stuartsierra.component :refer [Lifecycle]]
             [liber.resource :as resource]
             [ring.middleware.reload :as reload]
             [liber.websocket :as ws]

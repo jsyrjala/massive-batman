@@ -7,7 +7,7 @@
             [clojure.tools.namespace.repl :refer (refresh refresh-all)]
             [clojure.tools.logging :refer (trace debug info warn error)]
             [liber.system :as system]
-            [liber.lifecycle :as lifecycle]))
+            [com.stuartsierra.component :as lifecycle]))
 
 ;; see http://thinkrelevance.com/blog/2013/06/04/clojure-workflow-reloaded
 

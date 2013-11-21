@@ -3,7 +3,7 @@
             [liber.pubsub :as pubsub]
             [liber.database.events :as events]
             [org.httpkit.server :refer [send! with-channel on-receive on-close]]
-            [liber.lifecycle :refer [Lifecycle]]
+            [com.stuartsierra.component :refer [Lifecycle]]
             [liber.api-schema :as schema]
             [clojure.tools.logging :refer [trace debug info warn error]])
   )

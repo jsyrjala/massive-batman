@@ -7,7 +7,7 @@
             [clj-time.coerce :as time-conv]
             [clj-time.core :as clj-time]
             [clojure.tools.logging :refer [trace debug info warn error]]
-            [liber.lifecycle :refer [Lifecycle]]
+            [com.stuartsierra.component :refer [Lifecycle]]
         ))
 
 

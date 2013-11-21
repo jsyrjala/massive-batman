@@ -5,7 +5,7 @@
             [liber.database.events :as events]
             [liberator.core :as liberator]
             [liberator.representation :as liberator-rep]
-            [liber.lifecycle :refer [Lifecycle]]
+            [com.stuartsierra.component :refer [Lifecycle]]
             [liber.api-schema :as schema]
             [cheshire.core :as json]
             [clj-schema.validation :refer [validation-errors]]

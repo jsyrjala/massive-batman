@@ -1,6 +1,6 @@
 (ns liber.pubsub
   "Publish-subscribe API"
-  (:require [liber.lifecycle :refer [Lifecycle]]
+  (:require [com.stuartsierra.component :refer [Lifecycle]]
             [clojure.tools.logging :refer [trace debug info warn error]])
   )
 

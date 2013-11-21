@@ -1,5 +1,5 @@
 (ns liber.system
-  (:require [liber.lifecycle :refer [Lifecycle start stop]]
+  (:require [com.stuartsierra.component :refer [Lifecycle start stop]]
             [clojure.tools.logging :refer [trace debug info warn error]]
             [org.httpkit.server :as httpkit]
             [ring.middleware.reload :as reload]

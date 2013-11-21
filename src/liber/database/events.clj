@@ -7,7 +7,7 @@
             [liber.database.dao :as dao]
             [clj-time.core :as clj-time]
             [clojure.tools.logging :refer [debug info warn error]]
-            [liber.lifecycle :refer [Lifecycle]]
+            [com.stuartsierra.component :refer [Lifecycle]]
         )
   )
 

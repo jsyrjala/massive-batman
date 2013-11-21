@@ -49,6 +49,10 @@
                  [cheshire "5.2.0"]
                  [ring-cors "0.1.0"]
 
+
+                 ;; structure
+                 [com.stuartsierra/component "0.2.0"]
+
                  ;; security
                  [commons-codec/commons-codec "1.7"]
 
