@@ -7,7 +7,7 @@
             [clojure.tools.namespace.repl :refer (refresh refresh-all)]
             [clojure.tools.logging :refer (trace debug info warn error)]
             [liber.system :as system]
-            [com.stuartsierra.component :as lifecycle]))
+            [com.stuartsierra.component :as component]))
 
 ;; see http://thinkrelevance.com/blog/2013/06/04/clojure-workflow-reloaded
 
@@ -23,7 +23,7 @@
   "Starts the current development system."
   []
   (try
-    (alter-var-root #'system lifecycle/start)
+    (alter-var-root #'system component/start)
     (catch Exception e (error "Failed to start system" e)
       (throw e))))
 
@@ -32,7 +32,7 @@
   []
   (try
     (alter-var-root #'system
-                    (fn [s] (when s (lifecycle/stop s))))
+                    (fn [s] (when s (component/stop s))))
     (catch Exception e (error "Failed to stop system" e)
       (throw e))))
 

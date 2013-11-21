@@ -206,18 +206,20 @@
   (migrate-forward [this])
   (migrate-backward [this]))
 
-(defrecord DatabaseMigrator [connection]
+(defrecord DatabaseMigrator [db-spec]
   Lifecycle
   Migrator
   (start [this] this)
   (stop [this] this)
   (migrate-forward [this]
                    (info "Execute database migrations")
-                   (ragtime/migrate-all connection
-                                        (annotate migration-list)))
+                   (let [connection (merge (ragtime-sql/->SqlDatabase) db-spec)]
+                     (ragtime/migrate-all connection
+                                          (annotate migration-list))))
   (migrate-backward [this]
                     (info "Rollback database migrations")
-                    (ragtime/rollback-last connection 99999999999999))
+                    (let [connection (merge (ragtime-sql/->SqlDatabase) db-spec)]
+                      (ragtime/rollback-last connection 99999999999999)))
   )
 
 (defn create-migrator [db-spec]
