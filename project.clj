@@ -28,7 +28,8 @@
                  [org.slf4j/log4j-over-slf4j "1.7.5"]
 
                  ;; database
-                 [org.clojure/java.jdbc "0.3.0-alpha5"]
+                 [org.clojure/java.jdbc "0.3.0-beta1"]
+                 [java-jdbc/dsl "0.1.0"]
                  [honeysql "0.4.2"]
                  [postgresql/postgresql "9.1-901.jdbc4"]
                  [com.jolbox/bonecp "0.7.1.RELEASE"]

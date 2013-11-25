@@ -2,7 +2,7 @@
   (:require [com.stuartsierra.component :refer [Lifecycle]]
             [clojure.tools.logging :refer [trace debug info warn error]]
             [clojure.java.jdbc :as jdbc]
-            [clojure.java.jdbc.ddl :as ddl]
+            [java-jdbc.ddl :as ddl]
             [ragtime.sql.database :as ragtime-sql]
             [ragtime.core :as ragtime]
             )

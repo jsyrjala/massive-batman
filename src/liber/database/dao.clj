@@ -1,6 +1,6 @@
 (ns liber.database.dao
   (:require [clojure.java.jdbc :as jdbc]
-            [clojure.java.jdbc.sql :as sql]
+            [java-jdbc.sql :as sql]
             [liber.util :as util]
             [liber.database :as db]
             [liber.pubsub :as pubsub]
