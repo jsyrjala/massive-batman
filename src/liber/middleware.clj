@@ -1,6 +1,8 @@
 (ns liber.middleware
   "Compojure middlewares"
   (:require [clojure.string :as string]
+            [liber.util :as util]
+            [cheshire.core :as json]
             [clojure.tools.logging :refer [debug info warn error]])
   (:import com.fasterxml.jackson.core.JsonParseException) )
 
@@ -13,7 +15,10 @@
       (catch Exception e
         (error e "Handling request " (str req) " failed")
         {:status 500
-         :body {:error "Internal error"}}))))
+         :body (json/generate-string {:error "Internal error"}
+                                     {:prettyPrint true})
+         :headers {"Content-Type" "application/json;charset=UTF-8"}
+         }))))
 
 (defn wrap-x-forwarded-for
   "Replace value of remote-addr -header with value of X-Forwarded-for -header if available."
