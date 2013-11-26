@@ -1,7 +1,35 @@
 (ns liber.util
   (:require [clojure.tools.logging :refer [debug info warn error]]
+            [cheshire.core :as json]
+            [cheshire.generate :as json-gen]
+            [clj-time.coerce :as time-conv]
+            [liberator.representation :as liberator-rep]
+
             )
   )
+
+;; add support for jodatime for cheshire
+(json-gen/add-encoder org.joda.time.DateTime
+                      (fn [date-time jsonGenerator]
+                        (binding [json-gen/*date-format* "yyyy-MM-dd'T'HH:mm:ssZ"]
+                          (let [util-date (time-conv/to-date date-time)]
+                            (json-gen/encode-date util-date jsonGenerator)))))
+
+;; override liberator to render json with cheshire
+(defmethod liberator-rep/render-map-generic "application/json" [data context]
+  (json/generate-string data {:prettyPrint true}))
+
+(defmethod liberator-rep/render-seq-generic "application/json" [data context]
+  (json/generate-string data {:prettyPrint true}))
+
+(defn json-response
+  "Formats data map as JSON"
+  [status data]
+  (let [json-data (json/generate-string data {:prettyPrint true})]
+  (liberator-rep/ring-response {:status status
+                                :body json-data
+                                :header {:content-type "application/json"}
+                                })))
 
 (defn try-times*
   "Executes thunk. If an exception is thrown, will sleep and retry. At most n retries

@@ -1,13 +1,10 @@
 (ns liber.resource
   (:require [liberator.core :refer [request-method-in handle-unauthorized]]
-            [liberator.representation :refer [ring-response]]
             [clojure.tools.logging :refer [trace debug info warn error]]
             [liber.database.events :as events]
             [liberator.core :as liberator]
-            [liberator.representation :as liberator-rep]
             [com.stuartsierra.component :refer [Lifecycle]]
             [liber.api-schema :as schema]
-            [cheshire.core :as json]
             [clj-schema.validation :refer [validation-errors]]
             [liber.util :as util])
 )
@@ -15,6 +12,8 @@
 (def resource-defaults
   {:available-media-types ["application/json"]
    })
+
+
 
 (defn- add-defaults [kvs]
   (merge resource-defaults (apply hash-map kvs)))
@@ -33,13 +32,6 @@
     `(defn ~name [request#]
        (liberator/run-resource request# ~(add-defaults kvs)))))
 
-(defn- json-response
-  "Formats data map as JSON"
-  [status data]
-  (liberator-rep/ring-response {:status status
-                                :body (json/generate-string data {:prettyPrint true})
-                                :header {:content-type "application/json"}
-                              }))
 
 (defn- validation-errors? [data schema]
   (info "do some validation" data)
@@ -91,7 +83,8 @@
                           (println "jee")
                           {:b "jee"}
                           )))
-
+  ;; TODO authentication
+  ;; token auth?
   (tracker [this tracker-id]
            (resource
             :handle-ok (fn [ctx]
@@ -118,8 +111,8 @@
                                                   ::data converted-data}]))
            :handle-malformed (fn [ctx]
                                (let [errors (ctx ::validation-errors)
-                                     resp (json-response 400 {:error :malformed-data
-                                                              :validation-errors errors} )]
+                                     resp (util/json-response 400 {:error :malformed-data
+                                                                   :validation-errors errors} )]
                                  (debug "Malformed request" errors)
                                  resp))
            ;; check tracker exists
@@ -128,12 +121,11 @@
                           (let [tracker-code (-> ctx ::data :tracker_code)
                                 tracker (events/get-tracker event-service :code tracker-code)]
                             ;; TODO implement auth
-                            (if tracker
-                              {::tracker tracker}
-                              nil )))
+                            (when tracker
+                              {::tracker tracker})))
            :handle-unauthorized (fn [ctx]
                                   (info "handle-unauthorized")
-                                  (json-response 401 {:error :not-authorized}))
+                                  (util/json-response 401 {:error :not-authorized}))
 
            :allowed? true
            :post! (fn [ctx]
@@ -152,11 +144,13 @@
           :allowed-methods [:get]
           ;; check authorization
           :exists? (fn [ctx]
-                     ;;(let [event (get-event event-id)]
-                     ;;  {::event event}
-                     ;; )
-                     )
-          :handle-ok ::event))
+                     (let [event (events/get-event event-service event-id)]
+                       (when (seq event)
+                         (info "event dound" event)
+                         {::event event})))
+          :handle-not-found {:error :not-found}
+          :handle-ok (fn [ctx]
+                       (util/json-response 200 (ctx ::event)))))
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; users
   (users [this]

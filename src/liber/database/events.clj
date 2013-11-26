@@ -40,7 +40,7 @@
 
   (get-event
    [this id]
-   (dao/get-tracker (db/datasource database) id))
+   (dao/get-event (db/datasource database) id))
 
   (create-event!
    [this tracker event]

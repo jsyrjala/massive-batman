@@ -45,7 +45,7 @@
                  [ring/ring-core "1.2.1"]
                  [ring/ring-json "0.2.0"]
                  [compojure "1.1.6"]
-                 [liberator "0.9.0"]
+                 [liberator "0.10.0"]
                  [http-kit "2.1.12"]
                  [cheshire "5.2.0"]
                  [ring-cors "0.1.0"]

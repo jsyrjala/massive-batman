@@ -39,8 +39,8 @@
   (-> m to-sql-data))
 
 (defn- get-row [conn table predv]
-  (first
-   (jdbc/query conn (sql/select * table predv))))
+   (first
+    (jdbc/query conn (sql/select * table predv))))
 
 (defn- get-by-id [conn table id]
   (get-row conn table ["id = ?" id]))
@@ -139,7 +139,7 @@
 
 ;; events
 (defn get-event [conn id]
-  (get-by-id conn :events id))
+  (to-domain (get-by-id conn :events id)))
 
 ;; extension types and values
 (defn get-ext-type [conn type]
