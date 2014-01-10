@@ -1,11 +1,8 @@
 (ns liber.security
-  (:require [clojure.tools.logging :refer [debug info warn error]]
-            )
-  (:import [java.security MessageDigest]
-           [javax.crypto Mac]
-           [javax.crypto.spec SecretKeySpec]
-           [org.apache.commons.codec.binary Hex]
-           ))
+  (:require [clojure.tools.logging :refer [debug]])
+  (:import (javax.crypto Mac)
+           (javax.crypto.spec SecretKeySpec)
+           (org.apache.commons.codec.binary Hex)))
 
 (defn generate-mac-message [params mac-field]
   (let [;; remove mac key

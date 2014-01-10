@@ -1,10 +1,8 @@
 (ns liber.middleware
   "Compojure middlewares"
-  (:require [clojure.string :as string]
-            [liber.util :as util]
-            [cheshire.core :as json]
-            [clojure.tools.logging :refer [debug info warn error]])
-  (:import com.fasterxml.jackson.core.JsonParseException) )
+  (:require [cheshire.core :as json]
+            [clojure.string :as string]
+            [clojure.tools.logging :refer [error info]]))
 
 (defn wrap-exception-logging
   "Logs uncaught exceptions"

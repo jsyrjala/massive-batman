@@ -1,14 +1,9 @@
 (ns liber.database.dao
-  (:require [clojure.java.jdbc :as jdbc]
+  (:require [clj-time.coerce :as time-conv]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :refer [trace]]
             [java-jdbc.sql :as sql]
-            [liber.util :as util]
-            [liber.database :as db]
-            [liber.pubsub :as pubsub]
-            [clj-time.coerce :as time-conv]
-            [clj-time.core :as clj-time]
-            [clojure.tools.logging :refer [trace debug info warn error]]
-            [com.stuartsierra.component :refer [Lifecycle]]
-        ))
+            [liber.util :as util]))
 
 
 (defn- current-sql-timestamp [] (java.sql.Timestamp. (System/currentTimeMillis)))

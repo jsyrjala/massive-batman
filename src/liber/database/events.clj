@@ -1,14 +1,11 @@
 (ns liber.database.events
-  (:require [clojure.java.jdbc :as jdbc]
-            [liber.util :as util]
-            [liber.database :as db]
-            [liber.pubsub :as pubsub]
-            [liber.database.dao :as dao]
-            [clj-time.core :as clj-time]
-            [clojure.tools.logging :refer [debug info warn error]]
+  (:require [clj-time.core :as clj-time]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :refer [debug]]
             [com.stuartsierra.component :refer [Lifecycle]]
-        )
-  )
+            [liber.database :as db]
+            [liber.database.dao :as dao]
+            [liber.pubsub :as pubsub]))
 
 
 (defn- current-timestamp [] (clj-time/now))

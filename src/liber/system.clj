@@ -1,17 +1,14 @@
 (ns liber.system
-  (:require [com.stuartsierra.component :as component]
-            [clojure.tools.logging :refer [trace debug info warn error]]
-            [org.httpkit.server :as httpkit]
-            [ring.middleware.reload :as reload]
+  (:require [clojure.tools.logging :refer [debug]]
+            [com.stuartsierra.component :as component]
             [liber.database :as db]
-            [liber.route :as route]
-            [liber.resource :as resource]
-            [liber.pubsub :as pubsub]
-            [liber.websocket :as websocket]
-            [liber.database.migration :as migration]
             [liber.database.events :as events]
-            )
-  )
+            [liber.database.migration :as migration]
+            [liber.pubsub :as pubsub]
+            [liber.resource :as resource]
+            [liber.route :as route]
+            [liber.websocket :as websocket]
+            [org.httpkit.server :as httpkit]))
 
 
 (defrecord HttpKitServer [port routes]

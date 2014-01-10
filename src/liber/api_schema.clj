@@ -1,12 +1,15 @@
 (ns liber.api-schema
   "Schema validation for incoming API data."
-  (:require [clj-schema.schema :refer [def-map-schema optional-path sequence-of
-                                       map-schema set-of
-                                       constraints]]
+  (:require [clj-schema.schema :refer [constraints
+                                       def-map-schema
+                                       optional-path]]
             [clj-schema.validation :refer [validation-errors]]
-            [liber.parse :refer [parse-decimal parse-coordinate parse-timestamp parse-integer parse-boolean]]
-            [liber.util :as util]
-            ))
+            [liber.parse :refer [parse-boolean
+                                 parse-coordinate
+                                 parse-decimal
+                                 parse-integer
+                                 parse-timestamp]]
+            [liber.util :as util]))
 
 (defn- max-length [len] (fn [str] (<= (count str) len)))
 (defn- min-length [len] (fn [str] (>= (count str) len)))

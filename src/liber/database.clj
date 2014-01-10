@@ -1,9 +1,7 @@
 (ns liber.database
-  (:require [com.stuartsierra.component :refer [Lifecycle]]
-            [clojure.tools.logging :refer [trace debug info warn error]]
-            [clojure.java.jdbc :as jdbc])
-  (:import [com.jolbox.bonecp BoneCPDataSource])
-  )
+  (:require [clojure.tools.logging :refer [debug error info]]
+            [com.stuartsierra.component :refer [Lifecycle]])
+  (:import (com.jolbox.bonecp BoneCPDataSource)))
 
 (defn- make-pool [db-spec]
   (let [pool (BoneCPDataSource.)

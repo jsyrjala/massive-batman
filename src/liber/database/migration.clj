@@ -1,12 +1,10 @@
 (ns liber.database.migration
-  (:require [com.stuartsierra.component :refer [Lifecycle]]
-            [clojure.tools.logging :refer [trace debug info warn error]]
-            [clojure.java.jdbc :as jdbc]
+  (:require [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :refer [debug info]]
+            [com.stuartsierra.component :refer [Lifecycle]]
             [java-jdbc.ddl :as ddl]
-            [ragtime.sql.database :as ragtime-sql]
             [ragtime.core :as ragtime]
-            )
-  )
+            [ragtime.sql.database :as ragtime-sql]))
 
 (defn- drop-table [db table]
   (jdbc/db-do-commands

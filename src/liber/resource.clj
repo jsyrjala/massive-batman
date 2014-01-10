@@ -1,13 +1,11 @@
 (ns liber.resource
-  (:require [liberator.core :refer [request-method-in handle-unauthorized]]
-            [clojure.tools.logging :refer [trace debug info warn error]]
-            [liber.database.events :as events]
-            [liberator.core :as liberator]
+  (:require [clj-schema.validation :refer [validation-errors]]
+            [clojure.tools.logging :refer [debug info]]
             [com.stuartsierra.component :refer [Lifecycle]]
             [liber.api-schema :as schema]
-            [clj-schema.validation :refer [validation-errors]]
-            [liber.util :as util])
-)
+            [liber.database.events :as events]
+            [liber.util :as util]
+            [liberator.core :as liberator]))
 
 (def resource-defaults
   {:available-media-types ["application/json"]

@@ -1,18 +1,12 @@
 (ns liber.route
-  (:require [compojure.core :refer [defroutes routes ANY GET OPTIONS]]
-            [compojure.handler :refer [api]]
-            [clojure.tools.logging :refer [trace debug info warn error]]
-            [com.stuartsierra.component :refer [Lifecycle]]
-            [liber.resource :as resource]
-            [ring.middleware.reload :as reload]
-            [liber.websocket :as ws]
-            [ring.middleware.cors :as cors]
-            [ring.middleware.json :as ring-json]
-            [cheshire.core :as json]
+  (:require [com.stuartsierra.component :refer [Lifecycle]]
+            [compojure.core :refer [ANY GET OPTIONS routes]]
             [liber.middleware :as middleware]
+            [liber.resource :as resource]
+            [liber.websocket :as ws]
             [liberator.dev :as liber-dev]
-            )
-  )
+            [ring.middleware.cors :as cors]
+            [ring.middleware.json :as ring-json]))
 
 (defprotocol Routes
   (ring-handler [this]))
