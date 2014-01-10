@@ -32,7 +32,7 @@
                  [java-jdbc/dsl "0.1.0"]
                  [honeysql "0.4.3"]
                  [org.postgresql/postgresql "9.3-1100-jdbc41"]
-                 [com.jolbox/bonecp "0.7.1.RELEASE"]
+                 [com.jolbox/bonecp "0.8.0.RELEASE"]
                  [ragtime/ragtime.core "0.3.4"]
                  [ragtime/ragtime.sql "0.3.4"]
                  ;; database test
@@ -46,8 +46,8 @@
                  [ring/ring-json "0.2.0"]
                  [compojure "1.1.6"]
                  [liberator "0.10.0"]
-                 [http-kit "2.1.13"]
-                 [cheshire "5.3.0"]
+                 [http-kit "2.1.16"]
+                 [cheshire "5.3.1"]
                  [ring-cors "0.1.0"]
 
 
@@ -55,14 +55,14 @@
                  [com.stuartsierra/component "0.2.1"]
 
                  ;; security
-                 [commons-codec/commons-codec "1.7"]
+                 [commons-codec/commons-codec "1.9"]
 
                  ;; api
                  [org.clojars.runa/clj-schema "0.9.4"]
 
                  ;; util
                  [clj-time "0.6.0"]
-                 [org.clojure/tools.cli "0.3.0"]
+                 [org.clojure/tools.cli "0.3.1"]
 
                  ]
   :main liber.core
