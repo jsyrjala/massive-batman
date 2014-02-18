@@ -8,7 +8,9 @@
             [liber.resource :as resource]
             [liber.route :as route]
             [liber.websocket :as websocket]
-            [org.httpkit.server :as httpkit]))
+            [org.httpkit.server :as httpkit]
+            [plumbing.core :refer [defnk]]
+            [com.redbrainlabs.system-graph :as system-graph]))
 
 
 (defrecord HttpKitServer [port routes]
@@ -23,76 +25,55 @@
         ((:httpkit this))
         (dissoc this :httpkit)))
 
-(defn database []
-  (component/using
-   (db/map->Database {:data (atom {})})
-   [:db-spec]))
+(defnk database [db-spec]
+  (db/map->Database {:db-spec db-spec :data (atom {})}))
 
-(defn migrator []
-  (component/using
-   (migration/map->DatabaseMigrator {})
-   [:db-spec]))
+(defnk migrator [db-spec]
+  (migration/map->DatabaseMigrator {:db-spec db-spec}))
 
-(defn pubsub-service []
-  (component/using
-   (pubsub/map->ClojurePubSub {:channels (atom {})})
-   []))
+(defnk pubsub-service []
+  (pubsub/map->ClojurePubSub {:channels (atom {})}))
 
-(defn event-service []
-  (component/using
-   (events/map->SqlEventService {})
-   [:database :pubsub-service]))
+(defnk event-service [database pubsub-service]
+  (events/map->SqlEventService {:database database :pubsub-service pubsub-service}))
 
-(defn websocket []
-  (component/using
-   (websocket/map->WebSocket {})
-   [:pubsub-service :event-service]))
+(defnk websocket [pubsub-service event-service]
+  (websocket/map->WebSocket {:pubsub-service pubsub-service :event-service event-service}))
 
-(defn routes []
-  (component/using
-   (route/map->RestRoutes {})
-   [:websocket :resources]))
+(defnk routes [websocket resources]
+  (route/map->RestRoutes {:websocket websocket :resources resources}))
 
-(defn resources []
-  (component/using
-   (resource/map->JsonEventResources {})
-   [:event-service]))
+(defnk resources [event-service]
+  (resource/map->JsonEventResources {:event-service event-service}))
 
-(defn httpkit-server [port]
-  (component/using
-   (map->HttpKitServer {:port port})
-   [:routes]))
+(defnk httpkit-server [port routes]
+  (map->HttpKitServer {:port port :routes routes}))
 
 
-(def ruuvi-components [:migrator :database :pubsub-service :websocket :event-service :routes :server])
-
-(defrecord RuuviSystem [migrator database pubsub-service websocket event-service routes server]
-  component/Lifecycle
-  (start [this]
-         (component/start-system this (keys this)))
-  (stop [this]
-        (component/stop-system this (keys this)))
-  )
+(def ruuvi-system-graph
+  {:database database
+   :migrator migrator
+   :pubsub-service pubsub-service
+   :websocket websocket
+   :event-service event-service
+   :routes routes
+   :resources resources
+   :httpkit-server httpkit-server
+   })
 
 (defn create-system [port]
-  (let [conf {:migrator (migrator)
-              :database (database)
-              :pubsub-service (pubsub-service)
-              :websocket (websocket)
-              :event-service (event-service)
-              :routes (routes)
-              :resources (resources)
-              :server (httpkit-server port)
-              :db-spec {:connection-uri "jdbc:h2:mem:test;DATABASE_TO_UPPER=FALSE;DB_CLOSE_DELAY=-1"
-                        :classname "org.h2.Driver"
-                        :username ""
-                        :password ""
-                        :max-connections-per-partition 20
-                        :partition-count 4}
-              :db-spec-file {:connection-uri "jdbc:h2:file;DATABASE_TO_UPPER=TRUE"
-                             :classname "org.h2.Driver"
-                             :username ""
-                             :password ""
-                             :max-connections-per-partition 20
-                             :partition-count 4}}]
-    (map->RuuviSystem conf)))
+  (system-graph/init-system ruuvi-system-graph
+                            {:port port
+                             :db-spec {:connection-uri "jdbc:h2:mem:test;DATABASE_TO_UPPER=FALSE;DB_CLOSE_DELAY=-1"
+                                       :classname "org.h2.Driver"
+                                       :username ""
+                                       :password ""
+                                       :max-connections-per-partition 20
+                                       :partition-count 4}
+                             :db-spec-file {:connection-uri "jdbc:h2:file;DATABASE_TO_UPPER=TRUE"
+                                            :classname "org.h2.Driver"
+                                            :username ""
+                                            :password ""
+                                            :max-connections-per-partition 20
+                                            :partition-count 4}
+                             }))
