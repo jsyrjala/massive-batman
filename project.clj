@@ -12,6 +12,7 @@
                     [org.clojure/java.classpath "0.2.1"]
                     [midje "1.5.1" :exclusions [org.clojure/clojure]]
                     ]}
+             :uberjar {:aot :all}
              :provided {:dependencies [[javax.servlet/servlet-api "2.5"]]}}
 
   :dependencies [[org.clojure/clojure "1.5.1"]

@@ -1,4 +1,5 @@
 (ns liber.core
+  (:gen-class)
   (:require [com.stuartsierra.component :refer [start stop]]
             [liber.system :as system]))
 
