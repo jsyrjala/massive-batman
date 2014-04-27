@@ -11,7 +11,8 @@
                    [[org.clojure/tools.namespace "0.2.4"]
                     [org.clojure/java.classpath "0.2.2"]
                     [midje "1.6.3" :exclusions [org.clojure/clojure]]
-                    ]}
+                    ]
+                   :plugins [[lein-ring "0.8.10"]]}
              :uberjar {:resource-paths ["swagger-ui"]
                        :aot :all}
              :provided {:dependencies [[javax.servlet/servlet-api "2.5"]]}}
@@ -48,7 +49,8 @@
                  [ring/ring-json "0.3.1"]
                  [compojure "1.1.6"]
                  [liberator "0.11.0"]
-                 [http-kit "2.1.18"]
+                 ;; 2.1.18 seems to have some issues
+                 [http-kit "2.1.16"]
                  [cheshire "5.3.1"]
                  [ring-cors "0.1.1"]
                  [javax.servlet/servlet-api "2.5"]
@@ -77,4 +79,7 @@
                  ]
   :main liber.core
   :jvm-opts ["-server" "-XX:+UseConcMarkSweepGC"]
+  :ring {:init liber.core/init-handler
+         :handler liber.core/handler
+         :destroy liber.core/destroy-handler}
 )
