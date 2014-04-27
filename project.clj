@@ -12,7 +12,8 @@
                     [org.clojure/java.classpath "0.2.2"]
                     [midje "1.6.3" :exclusions [org.clojure/clojure]]
                     ]}
-             :uberjar {:aot :all}
+             :uberjar {:resource-paths ["swagger-ui"]
+                       :aot :all}
              :provided {:dependencies [[javax.servlet/servlet-api "2.5"]]}}
 
   :dependencies [[org.clojure/clojure "1.6.0"]
@@ -50,17 +51,24 @@
                  [http-kit "2.1.18"]
                  [cheshire "5.3.1"]
                  [ring-cors "0.1.1"]
+                 [javax.servlet/servlet-api "2.5"]
 
 
                  ;; structure
                  [com.stuartsierra/component "0.2.1"]
-                 [com.redbrainlabs/system-graph "0.1.0"]
+                 [com.redbrainlabs/system-graph "0.2.0-SNAPSHOT"]
 
                  ;; security
                  [commons-codec/commons-codec "1.9"]
 
                  ;; api
                  [org.clojars.runa/clj-schema "0.9.4"]
+
+                 [metosin/compojure-api "0.10.4"]
+                 [metosin/ring-http-response "0.4.0"]
+                 [metosin/ring-swagger-ui "2.0.12-1"]
+                 [prismatic/schema "0.2.1"]
+                 [prismatic/plumbing "0.2.2"]
 
                  ;; util
                  [clj-time "0.7.0"]

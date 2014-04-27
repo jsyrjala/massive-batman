@@ -7,6 +7,7 @@
             [liber.pubsub :as pubsub]
             [liber.resource :as resource]
             [liber.route :as route]
+            [liber.handler :as handler]
             [liber.websocket :as websocket]
             [org.httpkit.server :as httpkit]
             [plumbing.core :refer [defnk]]
@@ -17,8 +18,11 @@
   component/Lifecycle
   (start [this]
          (debug "Start http kit, port:" port)
+         ;;(assoc this
+         ;;  :httpkit (httpkit/run-server (route/ring-handler routes)
+         ;;                               {:port port})))
          (assoc this
-           :httpkit (httpkit/run-server (route/ring-handler routes)
+           :httpkit (httpkit/run-server (-> routes :app)
                                         {:port port})))
   (stop [this]
         (debug "Stop http kit, port:" port)
@@ -43,6 +47,10 @@
 (defnk routes [websocket resources]
   (route/map->RestRoutes {:websocket websocket :resources resources}))
 
+(defnk routes-swagger [database]
+  (handler/map->SwaggerRoutes {:database database}))
+
+
 (defnk resources [event-service]
   (resource/map->JsonEventResources {:event-service event-service}))
 
@@ -56,7 +64,7 @@
    :pubsub-service pubsub-service
    :websocket websocket
    :event-service event-service
-   :routes routes
+   :routes routes-swagger
    :resources resources
    :httpkit-server httpkit-server
    })
