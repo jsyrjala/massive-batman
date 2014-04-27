@@ -15,7 +15,7 @@
              :uberjar {:aot :all}
              :provided {:dependencies [[javax.servlet/servlet-api "2.5"]]}}
 
-  :dependencies [[org.clojure/clojure "1.5.1"]
+  :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/tools.trace "0.7.8"]
 
                  ;; logging
