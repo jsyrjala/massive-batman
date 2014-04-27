@@ -9,14 +9,14 @@
   :profiles {:dev {:source-paths ["dev"]
                    :dependencies
                    [[org.clojure/tools.namespace "0.2.4"]
-                    [org.clojure/java.classpath "0.2.1"]
-                    [midje "1.5.1" :exclusions [org.clojure/clojure]]
+                    [org.clojure/java.classpath "0.2.2"]
+                    [midje "1.6.3" :exclusions [org.clojure/clojure]]
                     ]}
              :uberjar {:aot :all}
              :provided {:dependencies [[javax.servlet/servlet-api "2.5"]]}}
 
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.clojure/tools.trace "0.7.6"]
+                 [org.clojure/tools.trace "0.7.8"]
 
                  ;; logging
                  [org.clojure/tools.logging "0.2.6"
@@ -25,8 +25,8 @@
                    commons-logging/commons-logging
                    org.slf4j/slf4j-api
                    org.slf4j/slf4j-log4j12]]
-                 [ch.qos.logback/logback-classic "1.0.13"]
-                 [org.slf4j/log4j-over-slf4j "1.7.5"]
+                 [ch.qos.logback/logback-classic "1.1.2"]
+                 [org.slf4j/log4j-over-slf4j "1.7.7"]
 
                  ;; database
                  [org.clojure/java.jdbc "0.3.0-beta1"]
@@ -34,22 +34,22 @@
                  [honeysql "0.4.3"]
                  [org.postgresql/postgresql "9.3-1100-jdbc41"]
                  [com.jolbox/bonecp "0.8.0.RELEASE"]
-                 [ragtime/ragtime.core "0.3.4"]
-                 [ragtime/ragtime.sql "0.3.4"]
+                 [ragtime/ragtime.core "0.3.6"]
+                 [ragtime/ragtime.sql "0.3.6"]
                  ;; database test
-                 [com.h2database/h2 "1.3.174"]
+                 [com.h2database/h2 "1.4.177"]
 
 
                  ;; web, rest
-                 [org.clojure/data.json "0.2.3"]
-                 [ring/ring-devel "1.2.1"]
-                 [ring/ring-core "1.2.1"]
-                 [ring/ring-json "0.2.0"]
+                 [org.clojure/data.json "0.2.4"]
+                 [ring/ring-devel "1.2.2"]
+                 [ring/ring-core "1.2.2"]
+                 [ring/ring-json "0.3.1"]
                  [compojure "1.1.6"]
-                 [liberator "0.10.0"]
-                 [http-kit "2.1.16"]
+                 [liberator "0.11.0"]
+                 [http-kit "2.1.18"]
                  [cheshire "5.3.1"]
-                 [ring-cors "0.1.0"]
+                 [ring-cors "0.1.1"]
 
 
                  ;; structure
@@ -63,7 +63,7 @@
                  [org.clojars.runa/clj-schema "0.9.4"]
 
                  ;; util
-                 [clj-time "0.6.0"]
+                 [clj-time "0.7.0"]
                  [org.clojure/tools.cli "0.3.1"]
 
                  ]
