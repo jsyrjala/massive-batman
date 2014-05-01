@@ -207,8 +207,13 @@
 (defrecord DatabaseMigrator [db-spec]
   Lifecycle
   Migrator
-  (start [this] this)
-  (stop [this] this)
+  (start [this]
+         (debug "DatabaseMigrator starting")
+         (migrate-forward this)
+         this)
+  (stop [this]
+        (debug "DatabaseMigrator stopping")
+        this)
   (migrate-forward [this]
                    (info "Execute database migrations")
                    (let [connection (merge (ragtime-sql/->SqlDatabase) db-spec)]

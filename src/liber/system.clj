@@ -53,7 +53,7 @@
 (defnk resources [event-service]
   (resource/map->JsonEventResources {:event-service event-service}))
 
-(defnk httpkit-server [port routes]
+(defnk httpkit-server [port routes websocket migrator]
   (map->HttpKitServer {:port port :routes routes}))
 
 
@@ -68,19 +68,23 @@
    :httpkit-server httpkit-server
    })
 
-(defn create-system [port]
+(defn- create-system [port db-spec]
   (system-graph/init-system ruuvi-system-graph
                             {:port port
-                             :db-spec {:connection-uri "jdbc:h2:mem:test;DATABASE_TO_UPPER=FALSE;DB_CLOSE_DELAY=-1;TRACE_LEVEL_FILE=4"
-                                       :classname "org.h2.Driver"
-                                       :username ""
-                                       :password ""
-                                       :max-connections-per-partition 20
-                                       :partition-count 4}
-                             :db-spec-file {:connection-uri "jdbc:h2:file;DATABASE_TO_UPPER=TRUE;TRACE_LEVEL_FILE=4"
-                                            :classname "org.h2.Driver"
-                                            :username ""
-                                            :password ""
-                                            :max-connections-per-partition 20
-                                            :partition-count 4}
-                             }))
+                             :db-spec db-spec}))
+
+(defn create-prod-system [port]
+  (create-system port {:connection-uri "jdbc:h2:~/ruuvidb/test;DATABASE_TO_UPPER=TRUE;TRACE_LEVEL_FILE=4"
+                       :classname "org.h2.Driver"
+                       :username ""
+                       :password ""
+                       :max-connections-per-partition 20
+                       :partition-count 4}))
+
+(defn create-dev-system [port]
+  (create-system port {:connection-uri "jdbc:h2:mem:test;DATABASE_TO_UPPER=FALSE;DB_CLOSE_DELAY=-1;TRACE_LEVEL_FILE=4"
+                       :classname "org.h2.Driver"
+                       :username ""
+                       :password ""
+                       :max-connections-per-partition 20
+                       :partition-count 4}))

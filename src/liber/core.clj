@@ -7,7 +7,7 @@
 (def handler)
 
 (defn start-server [port]
-  (let [s (system/create-system port)
+  (let [s (system/create-prod-system port)
         started (component/start s)
         app (-> started :routes :app)]
     (alter-var-root #'system-map (constantly started))
