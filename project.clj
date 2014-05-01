@@ -41,20 +41,17 @@
                  ;; database test
                  [com.h2database/h2 "1.4.177"]
 
-
                  ;; web, rest
                  [org.clojure/data.json "0.2.4"]
                  [ring/ring-devel "1.2.2"]
                  [ring/ring-core "1.2.2"]
                  [ring/ring-json "0.3.1"]
                  [compojure "1.1.6"]
-                 [liberator "0.11.0"]
                  ;; 2.1.18 seems to have some issues
                  [http-kit "2.1.16"]
                  [cheshire "5.3.1"]
                  [ring-cors "0.1.1"]
                  [javax.servlet/servlet-api "2.5"]
-
 
                  ;; structure
                  [com.stuartsierra/component "0.2.1"]
@@ -75,7 +72,6 @@
                  ;; util
                  [clj-time "0.7.0"]
                  [org.clojure/tools.cli "0.3.1"]
-
                  ]
   :main liber.core
   :jvm-opts ["-server" "-XX:+UseConcMarkSweepGC"]
