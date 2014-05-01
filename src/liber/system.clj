@@ -11,7 +11,6 @@
             [plumbing.core :refer [defnk]]
             [com.redbrainlabs.system-graph :as system-graph]))
 
-
 (defnk database [db-spec]
   (db/map->Database {:db-spec db-spec :data (atom {})}))
 
@@ -31,7 +30,8 @@
   (handler/new-routes event-service))
 
 (defnk httpkit-server [port routes migrator]
-  (server/new-server port routes))
+  (server/new-httpkit-server port routes))
+
 
 (def ruuvi-system-graph
   {:database database
@@ -40,26 +40,35 @@
    :websocket websocket
    :event-service event-service
    :routes routes-swagger
-   :httpkit-server httpkit-server
    })
 
-(defn- create-system [port db-spec]
-  (system-graph/init-system ruuvi-system-graph
-                            {:port port
-                             :db-spec db-spec}))
+(def file-db-spec {:connection-uri "jdbc:h2:~/ruuvidb/test;DATABASE_TO_UPPER=TRUE;TRACE_LEVEL_FILE=4"
+                   :classname "org.h2.Driver"
+                   :username ""
+                   :password ""
+                   :max-connections-per-partition 20
+                   :partition-count 4})
+
+(def mem-db-spec {:connection-uri "jdbc:h2:mem:test;DATABASE_TO_UPPER=FALSE;DB_CLOSE_DELAY=-1;TRACE_LEVEL_FILE=4"
+                  :classname "org.h2.Driver"
+                  :username ""
+                  :password ""
+                  :max-connections-per-partition 20
+                  :partition-count 4})
+
+(defn- create-system [graph options]
+  (system-graph/init-system graph options))
 
 (defn create-prod-system [port]
-  (create-system port {:connection-uri "jdbc:h2:~/ruuvidb/test;DATABASE_TO_UPPER=TRUE;TRACE_LEVEL_FILE=4"
-                       :classname "org.h2.Driver"
-                       :username ""
-                       :password ""
-                       :max-connections-per-partition 20
-                       :partition-count 4}))
+  (create-system (assoc ruuvi-system-graph :server httpkit-server)
+                 {:port port
+                  :db-spec file-db-spec}))
 
 (defn create-dev-system [port]
-  (create-system port {:connection-uri "jdbc:h2:mem:test;DATABASE_TO_UPPER=FALSE;DB_CLOSE_DELAY=-1;TRACE_LEVEL_FILE=4"
-                       :classname "org.h2.Driver"
-                       :username ""
-                       :password ""
-                       :max-connections-per-partition 20
-                       :partition-count 4}))
+  (create-system (assoc ruuvi-system-graph :server httpkit-server)
+                 {:port port
+                  :db-spec mem-db-spec}))
+
+(defn create-war-system []
+  (create-system ruuvi-system-graph
+                 {:db-spec file-db-spec}))

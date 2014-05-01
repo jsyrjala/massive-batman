@@ -17,5 +17,13 @@
         (dissoc this :httpkit)))
 
 
-(defn new-server [port routes]
+(defn new-httpkit-server [port routes]
   (->HttpKitServer port routes))
+
+(defrecord NullServer []
+  component/Lifecycle
+  (start [this] this)
+  (stop [this] this))
+
+(defn new-null-server []
+  (->NullServer))
