@@ -67,11 +67,12 @@
                      ))))
 
 (defn- parse-message [ch pubsub-service event-service msg]
+  ;; TODO handle non-JSON message
   (let [data (decode-json msg)]
     (try
       (cond (:ping data) (ping ch pubsub-service data)
-            (:subscribe data) (subscribe! ch pubsub-service (:ids data))
-            (:unsubscribe data) (unsubscribe! ch pubsub-service (:ids data))
+            (:subscribe data) (subscribe! ch pubsub-service (:id data))
+            (:unsubscribe data) (unsubscribe! ch pubsub-service (:id data))
             (:event data) (new-event ch event-service data)
             :else (unsupported-message ch data)
             )

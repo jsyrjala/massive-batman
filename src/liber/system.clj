@@ -24,10 +24,10 @@
   (events/map->SqlEventService {:database database :pubsub-service pubsub-service}))
 
 (defnk websocket [pubsub-service event-service]
-  (websocket/map->WebSocket {:pubsub-service pubsub-service :event-service event-service}))
+  (websocket/new-websocket pubsub-service event-service))
 
 (defnk routes-swagger [event-service websocket]
-  (handler/new-routes event-service))
+  (handler/new-routes event-service websocket))
 
 (defnk httpkit-server [port routes migrator]
   (server/new-httpkit-server port routes))

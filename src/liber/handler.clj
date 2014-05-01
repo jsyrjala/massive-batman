@@ -13,6 +13,7 @@
             [clj-time.format :refer [formatter unparse]]
             [clojure.tools.logging :refer (trace debug info warn error)]
             [liber.database.events :as events]
+            [liber.websocket :as ws]
             [liber.middleware :as middleware]
             [liber.security :as security]
             )
@@ -26,6 +27,10 @@
 (def ^:dynamic
   ^{:doc ""}
   *event-service* )
+
+(def ^:dynamic
+  ^{:doc ""}
+  *websocket* )
 
 ;; put time formatting to middleware
 (defn timestamp [] (unparse date-time-formatter (now)))
@@ -78,13 +83,10 @@
   (swaggered
    "WebSocket"
    :description "WebSocket endpoints."
-   (context "/api/v1-dev/websocket" []
+   (context "/api/v1-dev" []
             (GET* "/websocket" []
                   :summary "WebSocket endpoint"
-                  (do
-                    (println "wsocket")
-                    ;;ws/handler
-                    )
+                  (ws/ring-handler *websocket*)
                   )))
 
   (swaggered
@@ -239,17 +241,18 @@
 
 (def request-counter (atom 0))
 
-(defn wrap-component [handler event-service]
+(defn wrap-component [handler event-service websocket]
   (fn wrap-component-req [req]
-    (binding [*event-service* event-service]
+    (binding [*event-service* event-service
+              *websocket* websocket]
       (handler req))))
 
-(defrecord SwaggerRoutes [event-service]
+(defrecord SwaggerRoutes [event-service websocket]
   component/Lifecycle
   (start [this]
          (debug "SwaggerRoutes starting")
          (assoc this :app (-> app
-                              (wrap-component event-service)
+                              (wrap-component event-service websocket)
                               (middleware/wrap-request-logger request-counter))))
   (stop [this]
         (debug "SwaggerRoutes starting")
@@ -257,5 +260,5 @@
   )
 
 
-(defn new-routes [event-service]
-  (map->SwaggerRoutes {:event-service event-service}))
+(defn new-routes [event-service websocket]
+  (->SwaggerRoutes event-service websocket))
