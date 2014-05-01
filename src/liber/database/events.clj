@@ -18,8 +18,9 @@
           data))
 
 (defprotocol EventService
+  "TODO document"
   (get-event [this id])
-  (create-event! [this tracker event])
+  (create-event! [this tracker event] "create-event! creates a new event")
   (create-user! [this user])
   (create-tracker! [this owner tracker])
   (get-tracker [this &{:keys [code id]}])
@@ -43,7 +44,6 @@
    [this tracker event]
    (jdbc/db-transaction
     [conn (db/datasource database)]
-    (debug "creating event" event)
     ;; TODO move this stuff to dao
     (let [store-time (current-timestamp)
           event-time (get event :event_time store-time)
@@ -76,11 +76,12 @@
     (dao/create-tracker! conn owner tracker)))
 
   (get-tracker
-   [this &{:keys [code id]}]
+   [this type id]
    (jdbc/db-transaction
     [conn (db/datasource database)]
-    (cond id (dao/get-tracker conn id)
-          code (dao/get-tracker-by-code conn code))))
+    (condp = type
+      :id (dao/get-tracker conn id)
+      (dao/get-tracker-by-code conn id))))
 
 
   (create-user!

@@ -3,15 +3,18 @@
              [defapi swagger-ui swagger-docs swaggered context
               GET* POST* DELETE*]]
             [ring.swagger.schema :refer [field]]
-            [ring.util.http-response :refer [ok not-found]]
+            [ring.util.http-response :refer [ok not-found unauthorized bad-request!]]
             ;;[liber.websocket :as ws]
             [liber.domain :refer
              [Tracker NewTracker Session Event NewEvent User NewUser
-              Group NewGroup]]
+              Group NewGroup] :as domain]
             [com.stuartsierra.component :as component]
             [clj-time.core :refer [now time-zone-for-id]]
             [clj-time.format :refer [formatter unparse]]
             [clojure.tools.logging :refer (trace debug info warn error)]
+            [liber.database.events :as events]
+            [liber.middleware :as middleware]
+            [liber.security :as security]
             )
   )
 
@@ -22,10 +25,33 @@
 
 (def ^:dynamic
   ^{:doc ""}
-  *database* )
+  *event-service* )
 
 ;; put time formatting to middleware
 (defn timestamp [] (unparse date-time-formatter (now)))
+;; TODO move to somewhere
+(defn auth-new-event [event-service new-event]
+  (let [tracker-code (-> new-event :tracker_code)
+        tracker (events/get-tracker event-service :code tracker-code)
+        auth (security/authentication-status new-event tracker :mac)]
+    (auth :authenticated-tracker)
+  ))
+
+(defn process-new-event [event-service new-event]
+  (let [{:keys [tracker_code]} new-event
+        tracker (events/get-tracker event-service :code tracker_code)
+        authenticated (auth-new-event event-service new-event)
+        norm-new-event (try (domain/new-event->domain new-event)
+                         (catch Exception e
+                           (bad-request! {:error (.getMessage e)})))
+        created (events/create-event! event-service tracker norm-new-event)
+        event-id (-> created :id)]
+    (if created
+      (ok {:created event-id})
+      (unauthorized {:error "Not authenticated"})
+      )
+    )
+  )
 
 (defapi app
   (swagger-ui "/")
@@ -69,7 +95,7 @@
                   :summary "Get users"
                   :return [User]
                   (ok [{:result 1
-                       :db (:connection *database*)}])
+                       :db (:connection *event-service*)}])
                   )
             (POST* "/users" []
                    :summary "Register a new user"
@@ -163,16 +189,16 @@
    "Events"
    :description "Query and store events and location data."
    (context "/api/v1-dev" []
-            (POST* "/events" []
+            (POST* "/events" [:as request]
                    :body [new-event NewEvent]
                    :summary "Store a new event"
-                   (ok {:result new-event})
-                   )
-            (GET* "/event/:event-id" []
+                   (process-new-event *event-service* new-event))
+            (GET* "/events/:event-id" []
                   :path-params [event-id :- Long]
                   :return Event
                   :summary "Get event details"
-                  (ok ""))
+                  (do
+                    (ok "")))
             ))
 
   (swaggered
@@ -211,23 +237,25 @@
 
   )
 
+(def request-counter (atom 0))
 
-(defn wrap-component [handler database]
+(defn wrap-component [handler event-service]
   (fn wrap-component-req [req]
-    (binding [*database* database]
+    (binding [*event-service* event-service]
       (handler req))))
 
-(defrecord SwaggerRoutes [database]
+(defrecord SwaggerRoutes [event-service]
   component/Lifecycle
   (start [this]
          (debug "Routes::start")
          (assoc this :app (-> app
-                              (wrap-component database))))
+                              (wrap-component event-service)
+                              (middleware/wrap-request-logger request-counter))))
   (stop [this]
         (debug "Routes::stop")
         (dissoc this :app))
   )
 
 
-(defn new-routes []
-  (map->SwaggerRoutes {}))
+(defn new-routes [event-service]
+  (map->SwaggerRoutes {:event-service event-service}))

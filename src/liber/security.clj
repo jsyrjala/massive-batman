@@ -40,36 +40,37 @@
   (let [request-mac (params mac-field)
         request-password (params :password)
         tracker-password (:password tracker)
-        tracker-secret (:shared_secret tracker)]
+        tracker-secret (:shared_secret tracker)
+        tracker-code (:tracker_code tracker)]
     (cond
      (not (or request-mac request-password)) (do (debug "Client does not use authentication")
                                                  {:not-authenticated true})
      (not tracker) (do (debug "Tracker does not exist in system")
                        {:unknown-tracker true})
 
-     (and request-mac (not tracker-secret)) (do (debug "No shared secret for tracker")
+     (and request-mac (not tracker-secret)) (do (debug "No shared secret for tracker" tracker-code)
                                                 {:authentication-failed true})
 
-     (and request-password (not tracker-password)) (do (debug "No password for tracker")
+     (and request-password (not tracker-password)) (do (debug "No password for tracker" tracker-code)
                                                        {:authentication-failed true})
 
      (and request-mac tracker-secret)
      (let [computed-mac (compute-hmac params tracker-secret mac-field)]
        (if (= computed-mac request-mac)
-         (do (debug "Tracker is authenticated successfully using shared secret")
+         (do (debug "Tracker" tracker-code "is authenticated successfully using shared secret")
              {:authenticated-tracker true})
-         (do (debug "Tracker failed authentication using shared secret")
+         (do (debug "Tracker" tracker-code "failed authentication using shared secret")
              {:authentication-failed true})
          ))
 
      (and request-password tracker-password)
      (if (= request-password tracker-password)
-       (do (debug "Tracker is authenticated successfully using password")
+       (do (debug "Tracker" tracker-code "is authenticated successfully using password")
            {:authenticated-tracker true})
-       (do (debug "Tracker failed authentication using password")
+       (do (debug "Tracker" tracker-code "failed authentication using password")
            {:authentication-failed true})
        )
 
-     :else (do (debug "Tracker failed authentication")
+     :else (do (debug "Tracker" tracker-code "failed authentication")
                {:authentication-failed true})
      ) ))

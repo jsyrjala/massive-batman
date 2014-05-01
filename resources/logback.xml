@@ -31,6 +31,7 @@
   <logger name="com.mchange" level="warn" />
   <logger name="org.eclipse.jetty" level="info" />
   <logger name="org.apache.http" level="info" />
+  <logger name="h2database" level="warn" />
 
   <root level="trace">
     <appender-ref ref="STDOUT" />

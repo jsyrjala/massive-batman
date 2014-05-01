@@ -2,7 +2,7 @@
   "Compojure middlewares"
   (:require [cheshire.core :as json]
             [clojure.string :as string]
-            [clojure.tools.logging :refer [error info]]))
+            [clojure.tools.logging :refer [error debug info]]))
 
 (defn wrap-exception-logging
   "Logs uncaught exceptions"

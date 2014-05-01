@@ -1,7 +1,7 @@
 (ns liber.database.dao
   (:require [clj-time.coerce :as time-conv]
             [clojure.java.jdbc :as jdbc]
-            [clojure.tools.logging :refer [trace]]
+            [clojure.tools.logging :refer [trace debug]]
             [java-jdbc.sql :as sql]
             [liber.util :as util]))
 
@@ -67,13 +67,13 @@
         db-group (assoc (select-keys group [:name])
                    :owner_id owner-id)
         row (insert! conn :groups db-group)]
-    (prn db-group row)
-    row ))
+    row))
 
 ;; trackers
 (defn create-tracker! [conn owner tracker]
   (let [owner-id (or (:id owner) owner)
         db-tracker (assoc (select-keys tracker [:owner_id :tracker_code :name :password
+                                                :shared_secret
                                                 :description :public])
                      :owner_id owner-id)]
      (insert! conn :trackers db-tracker)))
@@ -85,8 +85,7 @@
   (get-by-id conn :trackers id))
 
 (defn get-tracker-by-code [conn tracker-code]
-  (first (sql/select :trackers ["code = ?" tracker-code])))
-
+  (get-row conn :trackers ["tracker_code = ?" tracker-code]))
 
 ;; add triggers to update updated_at fields to every table
 (defn update-tracker-activity! [conn tracker-id timestamp]

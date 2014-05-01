@@ -47,9 +47,8 @@
 (defnk routes [websocket resources]
   (route/map->RestRoutes {:websocket websocket :resources resources}))
 
-(defnk routes-swagger [database]
-  (handler/map->SwaggerRoutes {:database database}))
-
+(defnk routes-swagger [event-service]
+  (handler/new-routes event-service))
 
 (defnk resources [event-service]
   (resource/map->JsonEventResources {:event-service event-service}))
@@ -72,13 +71,13 @@
 (defn create-system [port]
   (system-graph/init-system ruuvi-system-graph
                             {:port port
-                             :db-spec {:connection-uri "jdbc:h2:mem:test;DATABASE_TO_UPPER=FALSE;DB_CLOSE_DELAY=-1"
+                             :db-spec {:connection-uri "jdbc:h2:mem:test;DATABASE_TO_UPPER=FALSE;DB_CLOSE_DELAY=-1;TRACE_LEVEL_FILE=4"
                                        :classname "org.h2.Driver"
                                        :username ""
                                        :password ""
                                        :max-connections-per-partition 20
                                        :partition-count 4}
-                             :db-spec-file {:connection-uri "jdbc:h2:file;DATABASE_TO_UPPER=TRUE"
+                             :db-spec-file {:connection-uri "jdbc:h2:file;DATABASE_TO_UPPER=TRUE;TRACE_LEVEL_FILE=4"
                                             :classname "org.h2.Driver"
                                             :username ""
                                             :password ""

@@ -1,6 +1,8 @@
 (ns liber.domain
   (:require [schema.core :refer [optional-key enum]]
             [ring.swagger.schema :refer [defmodel field]]
+            [liber.parse :as parse]
+            [liber.util :as util]
             )
   (:import [org.joda.time DateTime])
 )
@@ -99,3 +101,13 @@
 (defmodel NewGroup
   {})
 
+(def new-event-conversion
+  {[:time] parse/parse-timestamp
+   [:latitude] parse/parse-coordinate
+   [:longitude] parse/parse-coordinate
+   })
+
+(defn new-event->domain
+  "Convert various timestamp and lat/lon format in incoming new-event to standard format"
+  [new-event]
+  (util/convert new-event new-event-conversion))
