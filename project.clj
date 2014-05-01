@@ -58,7 +58,7 @@
 
                  ;; structure
                  [com.stuartsierra/component "0.2.1"]
-                 [com.redbrainlabs/system-graph "0.2.0-SNAPSHOT"]
+                 [com.redbrainlabs/system-graph "0.2.0"]
 
                  ;; security
                  [commons-codec/commons-codec "1.9"]
