@@ -1,6 +1,7 @@
 (ns liber.core
   (:gen-class)
   (:require [com.stuartsierra.component :as component]
+            [clojure.tools.logging :refer [info]]
             [liber.system :as system]))
 
 (def system-map)
@@ -29,9 +30,13 @@
   )
 
 (defn- add-shutdown-hook []
-  (.addShutdownHook (Runtime/getRuntime) (Thread. #(stop-server))))
+  (.addShutdownHook (Runtime/getRuntime) (Thread. (fn []
+                                                    (info "Shutting down system")
+                                                    (stop-server)
+                                                    (info "System terminated")))))
 
 (defn -main [& args]
   (let [port 9090]
+    (add-shutdown-hook)
     (start-server port)
     ))

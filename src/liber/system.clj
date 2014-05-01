@@ -5,29 +5,12 @@
             [liber.database.events :as events]
             [liber.database.migration :as migration]
             [liber.pubsub :as pubsub]
-            [liber.resource :as resource]
-            [liber.route :as route]
             [liber.handler :as handler]
             [liber.websocket :as websocket]
-            [org.httpkit.server :as httpkit]
+            [liber.server :as server]
             [plumbing.core :refer [defnk]]
             [com.redbrainlabs.system-graph :as system-graph]))
 
-
-(defrecord HttpKitServer [port routes]
-  component/Lifecycle
-  (start [this]
-         (debug "Start http kit, port:" port)
-         ;;(assoc this
-         ;;  :httpkit (httpkit/run-server (route/ring-handler routes)
-         ;;                               {:port port})))
-         (assoc this
-           :httpkit (httpkit/run-server (-> routes :app)
-                                        {:port port})))
-  (stop [this]
-        (debug "Stop http kit, port:" port)
-        ((:httpkit this))
-        (dissoc this :httpkit)))
 
 (defnk database [db-spec]
   (db/map->Database {:db-spec db-spec :data (atom {})}))
@@ -44,18 +27,11 @@
 (defnk websocket [pubsub-service event-service]
   (websocket/map->WebSocket {:pubsub-service pubsub-service :event-service event-service}))
 
-(defnk routes [websocket resources]
-  (route/map->RestRoutes {:websocket websocket :resources resources}))
-
-(defnk routes-swagger [event-service]
+(defnk routes-swagger [event-service websocket]
   (handler/new-routes event-service))
 
-(defnk resources [event-service]
-  (resource/map->JsonEventResources {:event-service event-service}))
-
-(defnk httpkit-server [port routes websocket migrator]
-  (map->HttpKitServer {:port port :routes routes}))
-
+(defnk httpkit-server [port routes migrator]
+  (server/new-server port routes))
 
 (def ruuvi-system-graph
   {:database database
@@ -64,7 +40,6 @@
    :websocket websocket
    :event-service event-service
    :routes routes-swagger
-   :resources resources
    :httpkit-server httpkit-server
    })
 

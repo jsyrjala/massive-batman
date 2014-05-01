@@ -247,12 +247,12 @@
 (defrecord SwaggerRoutes [event-service]
   component/Lifecycle
   (start [this]
-         (debug "Routes::start")
+         (debug "SwaggerRoutes starting")
          (assoc this :app (-> app
                               (wrap-component event-service)
                               (middleware/wrap-request-logger request-counter))))
   (stop [this]
-        (debug "Routes::stop")
+        (debug "SwaggerRoutes starting")
         (dissoc this :app))
   )
 
