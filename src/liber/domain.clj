@@ -1,5 +1,5 @@
 (ns liber.domain
-  (:require [schema.core :refer [optional-key enum]]
+  (:require [schema.core :refer [optional-key enum both]]
             [ring.swagger.schema :refer [defmodel field]]
             [liber.parse :as parse]
             [liber.util :as util]
@@ -8,18 +8,22 @@
 )
 
 
+(def tracker_code? (field (both String #"^[a-zA-Z0-9]+{4,30}$"){:description "TODO"}))
+(def tracker_name? (field (both String #"^.{1,256}$")
+                          {:description "TODO"}))
+
 (defmodel Tracker
   {:id (field Long {:description "TODO"})
-   :tracker_code (field Long {:description "TODO"})
-   :name (field String {:description "TODO"})
+   :tracker_code tracker_code?
+   :name tracker_name?
    (optional-key :latest_activity) (field DateTime {:description "Timestamp when this tracker last sent an event"})
    (optional-key :description ) (field String {:description "Short description of tracker"})
    :created_on (field String {:description "Time when tracker was created"})
    })
 
 (defmodel NewTracker
-  {:tracker_code (field String {:description "TODO"})
-   :name (field String {:description "TODO"})
+  {:tracker_code tracker_code?
+   :name tracker_name?
    :shared_secret (field String {:description "TODO"})
    :password (field String {:description "TODO"})
    (optional-key :description) (field String {:description "Short description of tracker"})
@@ -59,9 +63,12 @@
    (optional-key :location) EventLocation
    })
 
+(def mac? (field (both String #"^[a-fA-F0-9]{40}$")
+                 {:description ""}))
+
 (defmodel NewEvent
   {:version (field (enum "1") {:description "Version number of Tracker API. Currently constant 1."})
-   :tracker_code (field String {:description "Unique tracker identifier."})
+   :tracker_code tracker_code?
    (optional-key :session_code) (field String {:description "Session identifier. Same for events that belong to same session. Typically something timestamp related."})
    (optional-key :time) (field String {:description "TODO"})
    (optional-key :nonce) (field String {:description "TODO"})
@@ -77,7 +84,7 @@
    (optional-key :altitude) (field Double {:description "TODO"})
    (optional-key :temperature) (field Double {:description "TODO"})
    (optional-key :annotation) (field String {:description "TODO"})
-   (optional-key :mac) (field String {:description "TODO"})
+   (optional-key :mac) mac?
    }
   )
 
@@ -95,11 +102,13 @@
   {:username (field String {:description "Username"})
    :password (field String {:description "Password"})})
 
+(def group-name? (field String {:description "TODO"}))
 (defmodel Group
-  {})
+  {:name group-name?
+   :owner_id (field Long {:description "TODO"})})
 
 (defmodel NewGroup
-  {})
+  {:name group-name?})
 
 (def new-event-conversion
   {[:time] parse/parse-timestamp

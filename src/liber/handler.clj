@@ -129,6 +129,11 @@
                   (do
                   (println "XXXX" req)
                   (ok [{:result 1 :x (str req) }])))
+            (POST* "/trackers" []
+                   :body [new-tracker NewTracker]
+                   :return Tracker
+                   :summary "Create a new Tracker"
+                   (ok))
             (GET* "/trackers/:tracker-id" []
                   :path-params [tracker-id :- Long]
                   :return Tracker
