@@ -42,7 +42,7 @@
 
   (create-event!
    [this tracker event]
-   (jdbc/db-transaction
+   (jdbc/with-db-transaction
     [conn (db/datasource database)]
     ;; TODO move this stuff to dao
     (let [store-time (current-timestamp)
@@ -71,13 +71,13 @@
 
   (create-tracker!
    [this owner tracker]
-   (jdbc/db-transaction
+   (jdbc/with-db-transaction
     [conn (db/datasource database)]
     (dao/create-tracker! conn owner tracker)))
 
   (get-tracker
    [this type id]
-   (jdbc/db-transaction
+   (jdbc/with-db-transaction
     [conn (db/datasource database)]
     (condp = type
       :id (dao/get-tracker conn id)
@@ -86,13 +86,13 @@
 
   (create-user!
    [this user]
-   (jdbc/db-transaction
+   (jdbc/with-db-transaction
     [conn (db/datasource database)]
     (dao/create-user! conn user)))
 
   (create-group!
    [this owner group]
-   (jdbc/db-transaction
+   (jdbc/with-db-transaction
     [conn (db/datasource database)]
     (dao/create-group! conn owner group)))
   )

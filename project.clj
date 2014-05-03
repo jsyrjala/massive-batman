@@ -31,7 +31,7 @@
                  [org.slf4j/log4j-over-slf4j "1.7.7"]
 
                  ;; database
-                 [org.clojure/java.jdbc "0.3.0-beta1"]
+                 [org.clojure/java.jdbc "0.3.3"]
                  [java-jdbc/dsl "0.1.0"]
                  [honeysql "0.4.3"]
                  [org.postgresql/postgresql "9.3-1100-jdbc41"]
