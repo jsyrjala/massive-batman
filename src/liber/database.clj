@@ -1,25 +1,25 @@
 (ns liber.database
   (:require [clojure.tools.logging :refer [debug error info]]
             [com.stuartsierra.component :refer [Lifecycle]])
-  (:import (com.jolbox.bonecp BoneCPDataSource)))
+  (:import [com.zaxxer.hikari HikariDataSource HikariConfig]))
 
-(defn- make-pool [db-spec]
-  (let [pool (BoneCPDataSource.)
-        {:keys [classname
+(defn- make-hikari-pool [db-spec]
+  (let [config (HikariConfig.)
+        {:keys [datasource-classname
                 connection-uri
                 username
                 password
-                max-connections-per-partition
-                partition-count]} db-spec]
-    (.setDriverClass pool classname)
-    (.setJdbcUrl pool connection-uri)
-    (.setUsername pool username)
-    (.setPassword pool password)
-    (when max-connections-per-partition
-      (.setMaxConnectionsPerPartition pool max-connections-per-partition))
-    (when partition-count
-      (.setPartitionCount pool partition-count))
-    pool))
+                max-connections]} db-spec]
+    (doto config
+      (.setDataSourceClassName datasource-classname)
+      (.setMaximumPoolSize max-connections)
+      (.setConnectionTestQuery "VALUES 1")
+      (.addDataSourceProperty "URL",  connection-uri)
+      (.addDataSourceProperty "user" username)
+      (.addDataSourceProperty "password" password)
+      (.setPoolName "ruuvi-db-hikari"))
+    (HikariDataSource. config)
+  ))
 
 (defprotocol Datasource
   (datasource [this]))
@@ -29,7 +29,7 @@
   Datasource
   (start [this]
          (debug "Start database connection")
-         (let [pool (make-pool db-spec)]
+         (let [pool (make-hikari-pool db-spec)]
            (swap! data assoc :datasource pool)
            (assoc this :datasource pool)))
   (stop [this]

@@ -35,7 +35,7 @@
                  [java-jdbc/dsl "0.1.0"]
                  [honeysql "0.4.3"]
                  [org.postgresql/postgresql "9.3-1100-jdbc41"]
-                 [com.jolbox/bonecp "0.8.0.RELEASE"]
+                 [com.zaxxer/HikariCP "1.3.8"]
                  [ragtime/ragtime.core "0.3.6"]
                  [ragtime/ragtime.sql "0.3.6"]
                  ;; database test

@@ -44,17 +44,21 @@
 
 (def file-db-spec {:connection-uri "jdbc:h2:~/ruuvidb/test;DATABASE_TO_UPPER=TRUE;TRACE_LEVEL_FILE=4"
                    :classname "org.h2.Driver"
+                   :datasource-classname "org.h2.jdbcx.JdbcDataSource"
                    :username ""
                    :password ""
                    :max-connections-per-partition 20
-                   :partition-count 4})
+                   :partition-count 4
+                   :max-connections 80})
 
 (def mem-db-spec {:connection-uri "jdbc:h2:mem:test;DATABASE_TO_UPPER=FALSE;DB_CLOSE_DELAY=-1;TRACE_LEVEL_FILE=4"
                   :classname "org.h2.Driver"
+                  :datasource-classname "org.h2.jdbcx.JdbcDataSource"
                   :username ""
                   :password ""
                   :max-connections-per-partition 20
-                  :partition-count 4})
+                  :partition-count 4
+                  :max-connections 80})
 
 (defn- create-system [graph options]
   (system-graph/init-system graph options))
