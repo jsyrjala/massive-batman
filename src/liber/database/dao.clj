@@ -1,7 +1,7 @@
 (ns liber.database.dao
   (:require [clj-time.coerce :as time-conv]
             [clojure.java.jdbc :as jdbc]
-            [clojure.tools.logging :refer [trace debug]]
+            [clojure.tools.logging :refer [trace debug info]]
             [java-jdbc.sql :as sql]
             [liber.util :as util]))
 
@@ -10,15 +10,17 @@
 
 
 (defn to-domain-data [sql-map]
-  (into {}
+  (into (array-map)
         (map (fn mapper [[k v]]
-               (if (instance? java.sql.Timestamp v)
-                 [k (time-conv/from-sql-time v)]
-                 [k v]))
+               (cond (instance? java.sql.Timestamp v)
+                     [k (time-conv/from-sql-time v)]
+                     (instance? BigDecimal v)
+                     [k (double v)]
+                     :default [k v]))
              sql-map)))
 
 (defn to-sql-data [domain-map]
-  (into {}
+  (into (array-map)
         (map (fn mapper [[k v]]
                (if (instance? org.joda.time.DateTime v)
                  [k (time-conv/to-sql-time v)]
@@ -54,12 +56,21 @@
 
 (defn- update! [conn table new-values where-values])
 
+(defn hash-password [pw]
+  ;; TODO implement
+  pw)
+
 ;; users
 (defn create-user!
   [conn user]
-  (let [db-user (select-keys user [:username :email :name :password_hash])
+  (let [password (:password user)
+        db-user (-> (select-keys user [:username :email :name])
+                    (assoc :password_hash (hash-password password)))
         new-user (insert! conn :users db-user)]
     (dissoc new-user :password_hash)))
+
+(defn get-user [conn id]
+  (to-domain (get-by-id conn :users id)))
 
 (defn create-group!
   [conn owner group]

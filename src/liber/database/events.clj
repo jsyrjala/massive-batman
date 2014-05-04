@@ -22,6 +22,7 @@
   (get-event [this id])
   (create-event! [this tracker event] "create-event! creates a new event")
   (create-user! [this user])
+  (get-user [this id])
   (create-tracker! [this owner tracker])
   (get-tracker [this &{:keys [code id]}])
   (create-group! [this owner group]))
@@ -89,6 +90,10 @@
    (jdbc/with-db-transaction
     [conn (db/datasource database)]
     (dao/create-user! conn user)))
+
+  (get-user
+   [this id]
+   (dao/get-user (db/datasource database) id))
 
   (create-group!
    [this owner group]

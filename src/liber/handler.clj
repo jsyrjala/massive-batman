@@ -16,6 +16,8 @@
             [liber.websocket :as ws]
             [liber.middleware :as middleware]
             [liber.security :as security]
+            [clojure.set :refer [rename-keys]]
+            [liber.util :as util]
             )
   )
 
@@ -57,6 +59,28 @@
       )
     )
   )
+
+(defn event->domain [e]
+  (-> (select-keys e [:id
+                      :tracker_id
+                      :event_session_id
+                      :event_time
+                      :created_at
+                      ])
+      (rename-keys {:created_at :store_time})
+      (assoc :location
+        (select-keys e [:latitude
+                        :longitude
+                        :horizontal_accuracy
+                        :vertical_accuracy
+                        :speed
+                        :heading
+                        :satellite_count
+                        :altitude]))
+      util/remove-nils))
+
+(defn user->domain [e]
+  (-> e (select-keys [:id :name])))
 
 (defapi app
   (swagger-ui "/")
@@ -103,7 +127,8 @@
                    :summary "Register a new user"
                    :body [new-user NewUser]
                    :return User
-                   (ok ""))
+                   (ok (-> (events/create-user! *event-service* new-user)
+                           user->domain)))
             (GET* "/users/:user-id" []
                   :path-params [user-id :- Long]
                   :summary "Get user details"
@@ -204,8 +229,8 @@
                   :path-params [event-id :- Long]
                   :return Event
                   :summary "Get event details"
-                  (do
-                    (ok "")))
+                  (ok (-> (events/get-event *event-service* event-id)
+                          event->domain)))
             ))
 
   (swaggered
