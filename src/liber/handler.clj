@@ -3,11 +3,12 @@
              [defapi swagger-ui swagger-docs swaggered context
               GET* POST* DELETE*]]
             [ring.swagger.schema :refer [field]]
-            [ring.util.http-response :refer [ok not-found unauthorized bad-request!]]
+            [ring.util.http-response :refer
+             [ok not-found unauthorized unauthorized! bad-request!]]
             ;;[liber.websocket :as ws]
             [liber.domain :refer
              [Tracker NewTracker Session Event NewEvent User NewUser
-              Group NewGroup] :as domain]
+              Group NewGroup UserLogin] :as domain]
             [com.stuartsierra.component :as component]
             [clj-time.core :refer [now time-zone-for-id]]
             [clj-time.format :refer [formatter unparse]]
@@ -18,6 +19,7 @@
             [liber.security :as security]
             [clojure.set :refer [rename-keys]]
             [liber.util :as util]
+            [slingshot.slingshot :refer [throw+ try+]]
             )
   )
 
@@ -44,21 +46,8 @@
     (auth :authenticated-tracker)
   ))
 
-(defn process-new-event [event-service new-event]
-  (let [{:keys [tracker_code]} new-event
-        tracker (events/get-tracker event-service :code tracker_code)
-        authenticated (auth-new-event event-service new-event)
-        norm-new-event (try (domain/new-event->domain new-event)
-                         (catch Exception e
-                           (bad-request! {:error (.getMessage e)})))
-        created (events/create-event! event-service tracker norm-new-event)
-        event-id (-> created :id)]
-    (if created
-      (ok {:created event-id})
-      (unauthorized {:error "Not authenticated"})
-      )
-    )
-  )
+(defn user->domain [e]
+  (-> e (select-keys [:id :name])))
 
 (defn event->domain [e]
   (-> (select-keys e [:id
@@ -79,8 +68,28 @@
                         :altitude]))
       util/remove-nils))
 
-(defn user->domain [e]
-  (-> e (select-keys [:id :name])))
+(defn process-new-event [event-service new-event]
+  (let [{:keys [tracker_code]} new-event
+        tracker (events/get-tracker event-service :code tracker_code)
+        _ (when-not (auth-new-event event-service new-event)
+            (unauthorized! {:error "Invalid tracker_code or mac"}))
+        norm-new-event (try (domain/new-event->domain new-event)
+                         (catch Exception e
+                           (bad-request! {:error (.getMessage e)})))
+        created (events/create-event! event-service tracker norm-new-event)]
+    (ok {:created (-> created :id)})))
+
+(defn process-login [event-service user-login]
+  (let [user (try+
+                 (events/login event-service user-login)
+                 (catch :login-failed {}
+                   (unauthorized! {:error "Invalid username or password"})))
+        ]
+    ;; TODO create auth token
+    ;; store UUID to somewhere
+    (ok {:user (user->domain user)
+         :auth-token (util/uuid)})
+  ))
 
 (defapi app
   (swagger-ui "/")
@@ -120,8 +129,7 @@
             (GET* "/users" []
                   :summary "Get users"
                   :return [User]
-                  (ok [{:result 1
-                       :db (:connection *event-service*)}])
+                  (ok [{:not-implemented :yet}])
                   )
             (POST* "/users" []
                    :summary "Register a new user"
@@ -133,11 +141,12 @@
                   :path-params [user-id :- Long]
                   :summary "Get user details"
                   :return User
-                  (ok ""))
+                  (ok (-> (events/get-user *event-service* user-id)
+                          user->domain)))
             (POST* "/auth-tokens" []
                    :summary "Login user"
-                   :return [User]
-                   (ok ""))
+                   :body [user-login UserLogin]
+                   (process-login *event-service* user-login))
             (DELETE* "/auth-tokens" []
                      :summary "Logout user"
                      (ok ""))

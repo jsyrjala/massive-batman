@@ -59,6 +59,7 @@
 
                  ;; security
                  [commons-codec/commons-codec "1.9"]
+                 [crypto-password "0.1.0"]
 
                  ;; api
                  [org.clojars.runa/clj-schema "0.9.4"]
@@ -70,6 +71,7 @@
                  ;; util
                  [clj-time "0.7.0"]
                  [org.clojure/tools.cli "0.3.1"]
+                 [slingshot "0.10.3"]
                  ]
   :main liber.core
   :jvm-opts ["-server" "-XX:+UseConcMarkSweepGC"]

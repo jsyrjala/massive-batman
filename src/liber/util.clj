@@ -101,3 +101,9 @@ Example:
 "
   [data converters]
   (reduce #(updater %1 %2 converters) data (keys converters) ))
+
+
+(defn uuid
+  "Generate random UUID"
+  []
+  (str (java.util.UUID/randomUUID)))

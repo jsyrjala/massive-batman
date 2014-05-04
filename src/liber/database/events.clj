@@ -21,8 +21,11 @@
   "TODO document"
   (get-event [this id])
   (create-event! [this tracker event] "create-event! creates a new event")
+
   (create-user! [this user])
   (get-user [this id])
+  (login [this user-login])
+
   (create-tracker! [this owner tracker])
   (get-tracker [this &{:keys [code id]}])
   (create-group! [this owner group]))
@@ -94,6 +97,11 @@
   (get-user
    [this id]
    (dao/get-user (db/datasource database) id))
+
+  (login
+   [this user-login]
+   (let [{:keys [username password]} user-login]
+     (dao/login (db/datasource database) username password)))
 
   (create-group!
    [this owner group]

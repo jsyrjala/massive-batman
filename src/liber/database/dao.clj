@@ -3,11 +3,11 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :refer [trace debug info]]
             [java-jdbc.sql :as sql]
-            [liber.util :as util]))
-
+            [liber.util :as util]
+            [crypto.password.scrypt :as kdf]
+            [slingshot.slingshot :refer [throw+ try+]]))
 
 (defn- current-sql-timestamp [] (java.sql.Timestamp. (System/currentTimeMillis)))
-
 
 (defn to-domain-data [sql-map]
   (into (array-map)
@@ -42,9 +42,16 @@
 (defn- get-by-id [conn table id]
   (get-row conn table ["id = ?" id]))
 
+(defn- log-clean
+  "Hides sensitive data (e.g. password_hash) while logging"
+  [sql-data]
+  (if (sql-data :password_hash)
+    (assoc sql-data :password_hash "<secret>")
+    sql-data))
+
 (defn- insert! [conn table data]
   (let [sql-data (to-sql-data data)
-        _   (trace "insert!" table sql-data)
+        _   (trace "insert!" table (log-clean sql-data))
         row (first (jdbc/insert! conn table sql-data))
         id-keys [(keyword "scope_identity()")
                  (keyword "SCOPE_IDENTITY()")
@@ -56,9 +63,15 @@
 
 (defn- update! [conn table new-values where-values])
 
-(defn hash-password [pw]
-  ;; TODO implement
-  pw)
+;; TODO move to security.clj?
+(defn hash-password
+  "Create password hash using scrypt algorithm"
+  [password]
+  (kdf/encrypt password))
+
+(defn password-matches?
+  [input-password stored-password]
+  (kdf/check input-password stored-password))
 
 ;; users
 (defn create-user!
@@ -71,6 +84,17 @@
 
 (defn get-user [conn id]
   (to-domain (get-by-id conn :users id)))
+
+(defn get-user-by-username [conn username]
+  (to-domain (get-row conn :users ["username = ?" username])))
+
+(defn login [conn username password]
+  (let [user (get-user-by-username conn username)]
+    (when-not user
+      (throw+ {:login-failed :user-not-found}))
+    (when-not (password-matches? password (:password_hash user))
+      (throw+ {:login-failed :invalid-password}))
+    user))
 
 (defn create-group!
   [conn owner group]
@@ -103,8 +127,7 @@
   ;; TODO setting to event-time is correct?
   (jdbc/execute! conn
                  ["update trackers set latest_activity = greatest(?, latest_activity), updated_at = ? where id = ?"
-                  (time-conv/to-sql-time timestamp) (current-sql-timestamp) tracker-id] )
-  )
+                  (time-conv/to-sql-time timestamp) (current-sql-timestamp) tracker-id] ))
 
 ;; sessions
 (defn create-session! [conn tracker-id session-code timestamp]
@@ -124,9 +147,8 @@
 
 (defn update-session-activity! [conn session-id timestamp]
    (jdbc/execute! conn
-                 ["update event_sessions set latest_event_time = greatest(?, latest_event_time), updated_at = ? where id = ?"
+                  ["update event_sessions set latest_event_time = greatest(?, latest_event_time), updated_at = ? where id = ?"
                   (time-conv/to-sql-time timestamp) (current-sql-timestamp) session-id] ))
-
 
 (defn get-or-create-session! [conn tracker-id session-code timestamp]
   ;; there may be a burst of events that start a session, than can
