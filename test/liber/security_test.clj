@@ -1,7 +1,8 @@
 (ns liber.security-test
-  (:use midje.sweet
-        liber.security)
-  )
+  (:require [midje.sweet :refer :all]
+            [liber.security :refer :all]
+            [clojure.string :refer [lower-case upper-case]]
+  ))
 
 (def valid-mac "17e4ccf60f766710d0695348d7fda63cee0a3d46")
 (def valid-params {:X-foobar "bar",
@@ -11,6 +12,7 @@
                    :version "1",
                    :time "2012-04-02T18:35:11.000+0200",
                    :latitude "6457.934248,N"})
+(def upper-case-valid-params (update-in valid-params [:mac] upper-case))
 
 (def valid-password "joujou")
 (def valid-password-params {:X-foobar "bar",
@@ -45,6 +47,11 @@
       (authentication-status valid-params valid-tracker :mac)
       => {:authenticated-tracker true}
  (provided (compute-hmac valid-params valid-shared-secret :mac) => valid-mac))
+
+(fact "MAC matching is not case sensitive"
+      (authentication-status upper-case-valid-params valid-tracker :mac)
+      => {:authenticated-tracker true}
+ (provided (compute-hmac upper-case-valid-params valid-shared-secret :mac) => valid-mac))
 
 (fact "when request password matches trackers password, authentication succeeds"
       (authentication-status valid-password-params valid-password-tracker :mac)

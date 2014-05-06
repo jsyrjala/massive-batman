@@ -1,8 +1,9 @@
 (ns liber.security
-  (:require [clojure.tools.logging :refer [debug]])
-  (:import (javax.crypto Mac)
-           (javax.crypto.spec SecretKeySpec)
-           (org.apache.commons.codec.binary Hex)))
+  (:require [clojure.tools.logging :refer [debug]]
+            [clojure.string :refer [lower-case]])
+  (:import [javax.crypto Mac]
+           [javax.crypto.spec SecretKeySpec]
+           [org.apache.commons.codec.binary Hex]))
 
 (defn generate-mac-message [params mac-field]
   (let [;; remove mac key
@@ -56,7 +57,7 @@
 
      (and request-mac tracker-secret)
      (let [computed-mac (compute-hmac params tracker-secret mac-field)]
-       (if (= computed-mac request-mac)
+       (if (= computed-mac (lower-case request-mac))
          (do (debug "Tracker" tracker-code "is authenticated successfully using shared secret")
              {:authenticated-tracker true})
          (do (debug "Tracker" tracker-code "failed authentication using shared secret")
