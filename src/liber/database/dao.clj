@@ -1,10 +1,11 @@
 (ns liber.database.dao
   (:require [clj-time.coerce :as time-conv]
             [clojure.java.jdbc :as jdbc]
-            [clojure.tools.logging :refer [trace debug info]]
+            [clojure.tools.logging :refer [trace debug info warn]]
             [java-jdbc.sql :as sql]
             [liber.util :as util]
             [crypto.password.scrypt :as kdf]
+            [clojure.set :refer [rename-keys]]
             [slingshot.slingshot :refer [throw+ try+]]))
 
 (defn- current-sql-timestamp [] (java.sql.Timestamp. (System/currentTimeMillis)))
@@ -48,6 +49,19 @@
   (if (sql-data :password_hash)
     (assoc sql-data :password_hash "<secret>")
     sql-data))
+
+;; TODO -> util
+(defn- map-func [func data]
+  (if (seq data)
+    (map func data)
+    (func data)))
+
+(defmulti db->data (fn [data-type data] data-type))
+
+(defmethod db->data :default [data-type data]
+  (map-func (fn [x]
+              (-> x to-domain)
+              ) data))
 
 (defn- insert! [conn table data]
   (let [sql-data (to-sql-data data)
@@ -115,6 +129,11 @@
 
 (defn get-session-by-code [conn tracker-id session-code]
   (first (sql/select :event_sessions ["tracker_id = ? and code = ?" tracker-id session-code])))
+
+(defn get-visible-trackers [conn]
+  ;; TODO visibility check
+  (db->data :tracker (jdbc/query conn (sql/select * :trackers)))
+  )
 
 (defn get-tracker [conn id]
   (get-by-id conn :trackers id))

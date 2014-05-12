@@ -28,6 +28,7 @@
 
   (create-tracker! [this owner tracker])
   (get-tracker [this &{:keys [code id]}])
+  (get-visible-trackers [this])
   (create-group! [this owner group]))
 
 (defrecord SqlEventService [database pubsub-service]
@@ -79,6 +80,7 @@
     [conn (db/datasource database)]
     (dao/create-tracker! conn owner tracker)))
 
+  ;; TODO transaction not needed?
   (get-tracker
    [this type id]
    (jdbc/with-db-transaction
@@ -87,6 +89,9 @@
       :id (dao/get-tracker conn id)
       (dao/get-tracker-by-code conn id))))
 
+  (get-visible-trackers
+   [this]
+   (dao/get-visible-trackers (db/datasource database)))
 
   (create-user!
    [this user]

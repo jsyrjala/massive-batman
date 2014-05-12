@@ -2,6 +2,7 @@
   (:require [compojure.api.sweet :refer
              [defapi swagger-ui swagger-docs swaggered context
               GET* POST* DELETE*]]
+            [schema.core :refer [optional-key enum] :as schema]
             [ring.swagger.schema :refer [field]]
             [ring.util.http-response :refer
              [ok not-found unauthorized unauthorized! bad-request!]]
@@ -21,6 +22,7 @@
             [liber.util :as util]
             [slingshot.slingshot :refer [throw+ try+]]
             )
+  (:import [org.joda.time DateTime])
   )
 
 (def prefix "/api/v1-dev")
@@ -46,6 +48,26 @@
     (auth :authenticated-tracker)
   ))
 
+;; TODO -> util
+(defn- map-func [func data]
+  (if (seq data)
+    (map func data)
+    (func data)))
+
+;; TODO move to domain
+(defmulti data->domain (fn [data-type data] data-type))
+
+(defmethod data->domain :tracker [data-type tracker]
+  (map-func (fn [tracker]
+              (-> tracker
+                  (select-keys [:id :name :description
+                                :tracker_code :latest_activity
+                                :created_at])
+                  (rename-keys {:created_at :created_on})))
+            tracker)
+  )
+
+;; convert to data->domain multimethod
 (defn user->domain [e]
   (-> e (select-keys [:id :name])))
 
@@ -158,11 +180,14 @@
    :description "Query and configure tracking devices."
    (context "/api/v1-dev" []
             (GET* "/trackers" [:as req]
-                  ;; :return [Tracker]
+                  :return [Tracker]
                   :summary "Fetch all trackers (visible for current user)."
                   (do
-                  (println "XXXX" req)
-                  (ok [{:result 1 :x (str req) }])))
+                    (info "hdl " (events/get-visible-trackers *event-service*))
+
+                     (ok
+                      (data->domain :tracker
+                                    (events/get-visible-trackers *event-service*)))))
             (POST* "/trackers" []
                    :body [new-tracker NewTracker]
                    :return Tracker
@@ -180,9 +205,24 @@
                   (ok tracker-id))
             (GET* "/trackers/:tracker-id/sessions" []
                   :path-params [tracker-id :- Long]
+                  ;; TODO order (s/enum :latest :latestStored)
                   :return [Session]
                   :summary "Fetch tracking sessions for tracker"
                   (ok "ok"))
+
+            (GET* "/trackers/:tracker-id/events/:order" []
+                  :path-params [tracker-id :- Long
+                                order :- (enum :latest :latestStored)]
+                  :query-params [{maxResults :- (field Long {:description "Max number of result"})
+                                  nil}
+                                 {eventTimeStart :- DateTime nil}
+                                 {eventTimeEnd :- DateTime nil}
+                                 {storeTimeStart :- DateTime nil}
+                                 {storeTimeEnd :- DateTime nil}]
+                  :return [Event]
+                  :summary ""
+                  )
+
             (GET* "/trackers/:tracker-id/users" []
                   :path-params [tracker-id :- Long]
                   :return [User]

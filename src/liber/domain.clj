@@ -15,10 +15,10 @@
 (defmodel Tracker
   {:id (field Long {:description "TODO"})
    :tracker_code tracker_code?
-   :name tracker_name?
+   (optional-key :name) tracker_name?
    (optional-key :latest_activity) (field DateTime {:description "Timestamp when this tracker last sent an event"})
-   (optional-key :description ) (field String {:description "Short description of tracker"})
-   :created_on (field String {:description "Time when tracker was created"})
+   (optional-key :description) (field String {:description "Short description of tracker"})
+   (optional-key :created_on) (field DateTime {:description "Time when tracker was created"})
    })
 
 (defmodel NewTracker
