@@ -36,17 +36,17 @@
                  [honeysql "0.4.3"]
                  [org.postgresql/postgresql "9.3-1100-jdbc41"]
                  [com.zaxxer/HikariCP "1.3.8"]
-                 [ragtime/ragtime.core "0.3.6"]
-                 [ragtime/ragtime.sql "0.3.6"]
+                 [ragtime/ragtime.core "0.3.7"]
+                 [ragtime/ragtime.sql "0.3.7"]
                  ;; database test
-                 [com.h2database/h2 "1.4.177"]
+                 [com.h2database/h2 "1.4.178"]
 
                  ;; web, rest
                  [org.clojure/data.json "0.2.4"]
                  [ring/ring-devel "1.2.2"]
                  [ring/ring-core "1.2.2"]
                  [ring/ring-json "0.3.1"]
-                 [compojure "1.1.6"]
+                 [compojure "1.1.8"]
                  ;; 2.1.18 seems to have some issues
                  [http-kit "2.1.16"]
                  [cheshire "5.3.1"]
@@ -67,7 +67,7 @@
                  [metosin/compojure-api "0.11.1"]
                  [metosin/ring-swagger-ui "2.0.12-1"]
 
-                 [prismatic/schema "0.2.1"]
+                 [prismatic/schema "0.2.2"]
                  [prismatic/plumbing "0.2.2"]
 
                  ;; util
