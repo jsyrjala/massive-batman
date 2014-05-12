@@ -64,8 +64,8 @@
                  ;; api
                  [org.clojars.runa/clj-schema "0.9.4"]
 
-                 [metosin/compojure-api "0.11.1"]
-                 [metosin/ring-swagger-ui "2.0.12-1"]
+                 [metosin/compojure-api "0.11.3"]
+                 [metosin/ring-swagger-ui "2.0.16-2"]
 
                  [prismatic/schema "0.2.2"]
                  [prismatic/plumbing "0.2.2"]
