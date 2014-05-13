@@ -48,24 +48,17 @@
     (auth :authenticated-tracker)
   ))
 
-;; TODO -> util
-(defn- map-func [func data]
-  (if (seq data)
-    (map func data)
-    (func data)))
-
 ;; TODO move to domain
 (defmulti data->domain (fn [data-type data] data-type))
 
 (defmethod data->domain :tracker [data-type tracker]
-  (map-func (fn [tracker]
-              (-> tracker
-                  (select-keys [:id :name :description
-                                :tracker_code :latest_activity
-                                :created_at])
-                  (rename-keys {:created_at :created_on})))
-            tracker)
-  )
+  (util/map-func (fn [tracker]
+                   (-> tracker
+                       (select-keys [:id :name :description
+                                     :tracker_code :latest_activity
+                                     :created_at])
+                       (rename-keys {:created_at :created_on})))
+                 tracker))
 
 ;; convert to data->domain multimethod
 (defn user->domain [e]
@@ -182,12 +175,9 @@
             (GET* "/trackers" [:as req]
                   :return [Tracker]
                   :summary "Fetch all trackers (visible for current user)."
-                  (do
-                    (info "hdl " (events/get-visible-trackers *event-service*))
-
-                     (ok
-                      (data->domain :tracker
-                                    (events/get-visible-trackers *event-service*)))))
+                  (ok
+                   (data->domain :tracker
+                                 (events/get-visible-trackers *event-service*))))
             (POST* "/trackers" []
                    :body [new-tracker NewTracker]
                    :return Tracker

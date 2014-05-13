@@ -50,18 +50,12 @@
     (assoc sql-data :password_hash "<secret>")
     sql-data))
 
-;; TODO -> util
-(defn- map-func [func data]
-  (if (seq data)
-    (map func data)
-    (func data)))
-
 (defmulti db->data (fn [data-type data] data-type))
 
 (defmethod db->data :default [data-type data]
-  (map-func (fn [x]
-              (-> x to-domain)
-              ) data))
+  (util/map-func (fn [x]
+                   (-> x to-domain)
+                   ) data))
 
 (defn- insert! [conn table data]
   (let [sql-data (to-sql-data data)
@@ -132,8 +126,8 @@
 
 (defn get-visible-trackers [conn]
   ;; TODO visibility check
-  (db->data :tracker (jdbc/query conn (sql/select * :trackers)))
-  )
+  (let [data (jdbc/query conn (sql/select * :trackers))]
+    (db->data :tracker data)))
 
 (defn get-tracker [conn id]
   (get-by-id conn :trackers id))

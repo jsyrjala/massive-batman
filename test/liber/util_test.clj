@@ -31,3 +31,8 @@
       (convert data nil) => data
       (convert nil converters) => nil
       (convert data converters) => {:a {:b 2 :c 41 :d 7}})
+
+(fact (map-func str nil) => ""
+      (map-func str 1) => "1"
+      (map-func str '(1 2)) => '("1" "2")
+      (map-func str [1 2]) => '("1" "2"))

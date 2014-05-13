@@ -107,3 +107,12 @@ Example:
   "Generate random UUID"
   []
   (str (java.util.UUID/randomUUID)))
+
+(defn map-func
+  "When data is a sequence map-func is equal to map.
+  Otherwise map-func is equal to func."
+  [func data]
+  (cond
+   (vector? data) (map func data)
+   (seq? data) (map func data)
+   :default (func data)))
