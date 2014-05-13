@@ -14,7 +14,7 @@
                     ]
                    :plugins [[lein-ring "0.8.10"]]}
              :uberjar {:resource-paths ["swagger-ui"]
-                       :aot :all}
+                       :aot [liber.core]}
              :provided {:dependencies [[javax.servlet/servlet-api "2.5"]]}}
 
   :dependencies [[org.clojure/clojure "1.6.0"]
@@ -76,6 +76,7 @@
                  [slingshot "0.10.3"]
                  ]
   :main liber.core
+  :aot [liber.core]
   :jvm-opts ["-server" "-XX:+UseConcMarkSweepGC"]
   :ring {:init liber.core/init-handler
          :handler liber.core/handler
