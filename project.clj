@@ -50,7 +50,7 @@
                  ;; 2.1.18 seems to have some issues
                  [http-kit "2.1.16"]
                  [cheshire "5.3.1"]
-                 [ring-cors "0.1.1"]
+                 [ring-cors "0.1.2"]
                  [javax.servlet/servlet-api "2.5"]
 
                  ;; structure
@@ -59,16 +59,16 @@
 
                  ;; security
                  [commons-codec/commons-codec "1.9"]
-                 [crypto-password "0.1.0"]
+                 [crypto-password "0.1.3"]
 
                  ;; api
                  [org.clojars.runa/clj-schema "0.9.4"]
 
-                 [metosin/compojure-api "0.11.3"]
+                 [metosin/compojure-api "0.11.4"]
                  [metosin/ring-swagger-ui "2.0.16-2"]
 
                  [prismatic/schema "0.2.2"]
-                 [prismatic/plumbing "0.2.2"]
+                 [prismatic/plumbing "0.3.0"]
 
                  ;; util
                  [clj-time "0.7.0"]
