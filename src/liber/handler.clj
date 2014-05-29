@@ -139,7 +139,7 @@
             (GET* "/ping" []
                   :summary "Get server version and time."
                   (ok {:ruuvi-tracker-protocol-version "1"
-                       :server-software "CLJ-RTServer/0.0.1"
+                       :server-software "RuuviTracker Server/0.1.0"
                        :time (timestamp)}))
             ))
 
