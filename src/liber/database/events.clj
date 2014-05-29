@@ -20,6 +20,7 @@
 (defprotocol EventService
   "TODO document"
   (get-event [this id])
+  (search-events [this query])
   (create-event! [this tracker event] "create-event! creates a new event")
 
   (create-user! [this user])
@@ -44,6 +45,14 @@
   (get-event
    [this id]
    (dao/get-event (db/datasource database) id))
+
+  (search-events
+   [this query]
+   (let [max-rows 100 ;; TODO parametrize
+         limit (min (or (query :limit) max-rows) max-rows)]
+     (dao/search-events (db/datasource database)
+                        (assoc query
+                          :limit limit))))
 
   (create-event!
    [this tracker event]

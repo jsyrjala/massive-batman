@@ -3,6 +3,8 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :refer [trace debug info warn]]
             [java-jdbc.sql :as sql]
+            [honeysql.core :as honey]
+            [honeysql.helpers :refer [select from where merge-where order-by ] :as honeyh]
             [liber.util :as util]
             [crypto.password.scrypt :as kdf]
             [clojure.set :refer [rename-keys]]
@@ -29,9 +31,10 @@
              domain-map)))
 
 (defn to-domain [m]
-  (-> m
-      util/remove-nils
-      to-domain-data))
+  (util/map-func
+   #(-> %
+        util/remove-nils
+        to-domain-data) m))
 
 (defn to-sql [m]
   (-> m to-sql-data))
@@ -121,9 +124,6 @@
                      :owner_id owner-id)]
      (insert! conn :trackers db-tracker)))
 
-(defn get-session-by-code [conn tracker-id session-code]
-  (first (sql/select :event_sessions ["tracker_id = ? and code = ?" tracker-id session-code])))
-
 (defn get-visible-trackers [conn]
   ;; TODO visibility check
   (let [data (jdbc/query conn (sql/select * :trackers))]
@@ -152,11 +152,10 @@
   (get-by-id conn :event_sessions id))
 
 (defn get-event-session-for-code [conn tracker-id session-code]
-  (first
-   (jdbc/query conn
-               (sql/select * :event_sessions
-                           ["tracker_id = ? and session_code = ?"
-                            tracker-id session-code]))))
+  (get-row conn
+           :event_sessions
+           ["tracker_id = ? and session_code = ?"
+            tracker-id session-code]))
 
 (defn update-session-activity! [conn session-id timestamp]
    (jdbc/execute! conn
@@ -180,6 +179,45 @@
 ;; events
 (defn get-event [conn id]
   (to-domain (get-by-id conn :events id)))
+
+;; TODO -> util
+(defn and-where [query pred condition]
+  (if pred
+    (merge-where query condition)
+    query))
+
+(defn search-events
+  ""
+  [conn criteria]
+  (let [criteria (to-sql criteria)
+        {:keys [tracker-id
+                session-id
+                event-start
+                event-end
+                store-start
+                store-end
+                order-by
+                offset
+                limit
+                order
+                ]} criteria
+        query
+        (-> (select :*)
+            (from :events)
+            (and-where tracker-id  [:=  :tracker_id tracker-id])
+            (and-where session-id  [:=  :event_session_id session-id])
+            (and-where event-start [:>= :event_time event-start])
+            (and-where event-end   [:<= :event_time event-end])
+            (and-where store-start [:>= :created_at store-start])
+            (and-where store-end   [:<= :created_at store-end])
+            (honeyh/limit limit)
+            (honeyh/offset (or offset 0))
+            (honeyh/order-by [(or order :event_time) :desc])
+            (honey/format)
+            )]
+    (-> (jdbc/query conn query)
+        to-domain)
+  ))
 
 ;; extension types and values
 (defn get-ext-type [conn type]
