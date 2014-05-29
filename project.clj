@@ -47,8 +47,9 @@
                  [ring/ring-core "1.2.2"]
                  [ring/ring-json "0.3.1"]
                  [compojure "1.1.8"]
-                 ;; 2.1.18 seems to have some issues
-                 [http-kit "2.1.16"]
+                 ;; 2.1.17/2.1.18 have perf problems, https://github.com/http-kit/http-kit/issues/148
+                 ;; 2.1.17 and earlier have https://github.com/http-kit/http-kit/issues/127
+                 [http-kit "2.1.18"]
                  [cheshire "5.3.1"]
                  [ring-cors "0.1.2"]
                  [javax.servlet/servlet-api "2.5"]
