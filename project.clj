@@ -36,7 +36,7 @@
                  [honeysql "0.4.3"]
                  [org.postgresql/postgresql "9.3-1100-jdbc41"]
                  ;; com.zaxxer/HikariCP-java6 works on java7
-                 [com.zaxxer/HikariCP "2.0.1"]
+                 [com.zaxxer/HikariCP-java6 "2.0.1"]
                  [ragtime/ragtime.core "0.3.7"]
                  [ragtime/ragtime.sql "0.3.7"]
                  ;; database test
